@@ -4,7 +4,7 @@ from src.model.entity.Playlist import Playlist
 from src.interface.ObController import ObController
 
 # Namespace pour les opérations sur les playlists
-playlist_ns = Namespace('playlists', description='Playlist operations')
+playlist_ns = Namespace('playlists', description='Operations on playlist')
 
 # Modèle d'entrée pour la playlist
 playlist_model = playlist_ns.model('Playlist', {

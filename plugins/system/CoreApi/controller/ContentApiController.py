@@ -1,5 +1,11 @@
+import os
+import time
+import logging
+
 from flask import request, abort, jsonify
-from flask_restx import Resource, Namespace, fields
+from flask_restx import Resource, Namespace, fields, reqparse
+from werkzeug.datastructures import FileStorage
+from werkzeug.utils import secure_filename
 from src.model.entity.Content import Content
 from src.manager.FolderManager import FolderManager
 from src.model.enum.ContentType import ContentType
@@ -13,15 +19,7 @@ from plugins.system.CoreApi.exception.FolderNotEmptyException import FolderNotEm
 
 
 # Namespace for content operations
-content_ns = Namespace('content', description='Operations related to content management')
-
-# Input model for adding/updating content
-content_model = content_ns.model('Content', {
-    'name': fields.String(required=True, description='Name of the content'),
-    'type': fields.String(required=True, description='Type of the content'),
-    'location': fields.String(description='Location of the content (optional)'),
-    'path': fields.String(description='Path of the folder')
-})
+content_ns = Namespace('contents', description='Operations on contents')
 
 # Output model for content
 content_output_model = content_ns.model('ContentOutput', {
@@ -35,31 +33,50 @@ content_output_model = content_ns.model('ContentOutput', {
 # Model for folder operations
 folder_model = content_ns.model('Folder', {
     'name': fields.String(required=True, description='Name of the folder'),
-    'path': fields.String(description='Path of the folder')
+    'path': fields.String(required=False, description='Path context (with path starting with /)'),
+    'folder_id': fields.Integer(required=False, description='Path context (with folder id)')
 })
 
 # Model for bulk operations
 bulk_move_model = content_ns.model('BulkMove', {
     'entity_ids': fields.List(fields.Integer, required=True, description='List of content IDs to move'),
-    'path': fields.String(description='Path of the folder')
+    'path': fields.String(required=True, description='Destination path for the content'),
+    'folder_id': fields.Integer(required=False, description='Path context (with folder id)')
 })
 
+# Parser for content add/upload (single file)
+content_upload_parser = content_ns.parser()
+content_upload_parser.add_argument('name', type=str, required=True, help='Name of the content')
+content_upload_parser.add_argument('type', type=str, required=True, help='Type of the content')
+content_upload_parser.add_argument('object', type=FileStorage, location='files', required=True, help='File to be uploaded')
+content_upload_parser.add_argument('path', type=str, required=False, help='Path context (with path starting with /)')
+content_upload_parser.add_argument('folder_id', type=str, required=False, help='Path context (with folder id)')
+
+# Parser for content add/bulk uploads (multiple files)
+bulk_upload_parser = content_ns.parser()
+bulk_upload_parser.add_argument('path', type=str, required=False, help='Path context (with path starting with /)')
+bulk_upload_parser.add_argument('folder_id', type=str, required=False, help='Path context (with folder id)')
+bulk_upload_parser.add_argument('object', type=FileStorage, location='files', action='append', required=True, help='Files to be uploaded')
+
+# Parser for content edit
+content_edit_parser = content_ns.parser()
+content_edit_parser.add_argument('name', type=str, required=True, help='Name of the content')
+
+# Parser for content path context actions
+path_parser = content_ns.parser()
+path_parser.add_argument('path', type=str, required=False, help='Path context (with path starting with /)')
+path_parser.add_argument('folder_id', type=str, required=False, help='Path context (with folder id)')
+
+# Parser for folder add/edit
+folder_parser = content_ns.parser()
+folder_parser.add_argument('name', type=str, required=True, help='Name of the folder')
+folder_parser.add_argument('path', type=str, required=False, help='Path context (with path starting with /)')
+folder_parser.add_argument('folder_id', type=str, required=False, help='Path context (with folder id)')
 
 class ContentApiController(ObController):
 
     def register(self):
-# -        self._app.add_url_rule('/api/content', 'api_content_list', self.list_content, methods=['GET'])
-# -        self._app.add_url_rule('/api/content', 'api_content_add', self.add_content, methods=['POST'])
-# -        self._app.add_url_rule('/api/content/<int:content_id>', 'api_content_get', self.get_content, methods=['GET'])
-# -        self._app.add_url_rule('/api/content/<int:content_id>', 'api_content_update', self.update_content, methods=['PUT'])
-# -        self._app.add_url_rule('/api/content/<int:content_id>', 'api_content_delete', self.delete_content, methods=['DELETE'])
-# -        self._app.add_url_rule('/api/content/location/<int:content_id>', 'api_content_location', self.location_content, methods=['GET'])
-# -        self._app.add_url_rule('/api/content/upload-bulk', 'api_content_upload_bulk', self.upload_bulk_content, methods=['POST'])
-# -        self._app.add_url_rule('/api/content/folder/move-bulk', 'api_folder_content_bulk_move', self.move_bulk_content_folder, methods=['POST'])
-# -        self._app.add_url_rule('/api/content/folder', 'api_folder_add', self.add_folder, methods=['POST'])
-# -        self._app.add_url_rule('/api/content/folder', 'api_folder_delete', self.delete_folder, methods=['DELETE'])
-# -        self._app.add_url_rule('/api/content/folder', 'api_folder_update', self.update_folder, methods=['PUT'])
-        self.api().add_namespace(content_ns, path='/api/content')
+        self.api().add_namespace(content_ns, path='/api/contents')
         content_ns.add_resource(self.create_resource(ContentListResource), '/')
         content_ns.add_resource(self.create_resource(ContentResource), '/<int:content_id>')
         content_ns.add_resource(self.create_resource(ContentLocationResource), '/location/<int:content_id>')
@@ -74,30 +91,21 @@ class ContentApiController(ObController):
             '_controller': self
         })
 
-    def get_request_data(self):
-        data = {}
+    def _get_folder_context(self, data):
+        path = data.get('path', None)
+        folder_id = data.get('folder_id', None)
 
-        try:
-            if 'multipart/form-data' in request.headers.get('Content-Type'):
-                data = request.form
-            else:
-                data = request.get_json()
-        except:
-            pass
+        if folder_id:
+            folder = self._model_store.folder().get(id=folder_id)
 
-        return data
-
-    def get_folder_context(self):
-        data = self.get_request_data()
-        path = data.get('path')
-        path = "{}/{}".format(FOLDER_ROOT_PATH, path.strip('/')) if path and not path.startswith(FOLDER_ROOT_PATH) else path
-
-        if 'folder_id' in data:
-            folder = self._model_store.folder().get(id=data.get('folder_id'))
+            if not folder:
+                raise FolderNotFoundException()
             return path, folder
 
-        if 'path' not in data:
+        if not path:
             raise ContentPathMissingException()
+
+        path = "{}/{}".format(FOLDER_ROOT_PATH, path.strip('/')) if not path.startswith(FOLDER_ROOT_PATH) else path
 
         folder = self._model_store.folder().get_one_by_path(path=path, entity=FolderEntity.CONTENT)
         is_root_drive = FolderManager.is_root_drive(path)
@@ -107,20 +115,26 @@ class ContentApiController(ObController):
 
         return FOLDER_ROOT_PATH if is_root_drive else path, folder
 
+    def _post_update(self):
+        self._model_store.variable().update_by_name("last_content_update", time.time())
+
 
 class ContentListResource(Resource):
 
+    @content_ns.expect(path_parser)
     @content_ns.marshal_list_with(content_output_model)
     def get(self):
         """List all contents"""
-        data = self._controller.get_request_data()
+        data = path_parser.parse_args()
         working_folder_path = None
         working_folder = None
         folder_id = None
 
         try:
-            working_folder_path, working_folder = self._controller.get_folder_context()
+            working_folder_path, working_folder = self._controller._get_folder_context(data)
             folder_id = data.get('folder_id', 0 if not working_folder else working_folder.id)
+        except FolderNotFoundException:
+            pass
         except ContentPathMissingException:
             pass
 
@@ -130,37 +144,31 @@ class ContentListResource(Resource):
         )
         result = [content.to_dict() for content in contents]
 
-        return {
-            'contents': result,
-            'working_folder_path': working_folder_path,
-            'working_folder': working_folder.to_dict() if working_folder else None
-        }
+        return result
 
-    @content_ns.expect(content_model)
+    @content_ns.expect(content_upload_parser)
     @content_ns.marshal_with(content_output_model, code=201)
     def post(self):
         """Add new content"""
-        data = self._controller.get_request_data()
-        working_folder_path, working_folder = self._controller.get_folder_context()
-
-        if 'name' not in data:
-            abort(400, description="Name is required")
-
-        if 'type' not in data:
-            abort(400, description="Type is required")
-
-        if data.get('type') not in {type.value for type in ContentType}:
-            abort(400, description="Invalid type")
+        data = content_upload_parser.parse_args()
+        working_folder_path, working_folder = self._controller._get_folder_context(data)
 
         content_type = str_to_enum(data.get('type'), ContentType)
-        location = data.get('location', None)
+
+        # Handle file upload
+        file = data.get('object')
+        if not file:
+            abort(400, description="File is required")
+
+        filename = secure_filename(file.filename)
+        file.save(os.path.join(self._controller._app.config['UPLOAD_FOLDER'], filename))
 
         content = self._model_store.content().add_form_raw(
             name=data.get('name'),
             type=content_type,
-            request_files=request.files,
+            request_files=file,
             upload_dir=self._controller._app.config['UPLOAD_FOLDER'],
-            location=location,
+            location=None,
             folder_id=working_folder.id if working_folder else None
         )
 
@@ -181,11 +189,11 @@ class ContentResource(Resource):
 
         return content.to_dict()
 
-    @content_ns.expect(content_model)
+    @content_ns.expect(content_edit_parser)
     @content_ns.marshal_with(content_output_model)
     def put(self, content_id: int):
         """Update existing content"""
-        data = self._controller.get_request_data()
+        data = content_edit_parser.parse_args()
         content = self._model_store.content().get(content_id)
 
         if not content:
@@ -235,24 +243,27 @@ class ContentLocationResource(Resource):
 
 class ContentBulkUploadResource(Resource):
 
+    @content_ns.expect(bulk_upload_parser)
     def post(self):
         """Upload multiple content files"""
-        working_folder_path, working_folder = self._controller.get_folder_context()
+        data = bulk_upload_parser.parse_args()
+        working_folder_path, working_folder = self._controller._get_folder_context(data)
 
-        for key in request.files:
-            files = request.files.getlist(key)
-            for file in files:
-                content_type = ContentType.guess_content_type_file(file.filename)
-                name = file.filename.rsplit('.', 1)[0]
+        for file in data.get('object'):
+            content_type = ContentType.guess_content_type_file(file.filename)
+            name = file.filename.rsplit('.', 1)[0]
 
-                if content_type:
-                    self._model_store.content().add_form_raw(
-                        name=name,
-                        type=content_type,
-                        request_files=file,
-                        upload_dir=self._controller._app.config['UPLOAD_FOLDER'],
-                        folder_id=working_folder.id if working_folder else None
-                    )
+            if content_type:
+                filename = secure_filename(file.filename)
+                file.save(os.path.join(self._controller._app.config['UPLOAD_FOLDER'], filename))
+
+                self._model_store.content().add_form_raw(
+                    name=name,
+                    type=content_type,
+                    request_files=file,
+                    upload_dir=self._controller._app.config['UPLOAD_FOLDER'],
+                    folder_id=working_folder.id if working_folder else None
+                )
 
         return {'status': 'ok'}, 201
 
@@ -262,8 +273,9 @@ class FolderBulkMoveResource(Resource):
     @content_ns.expect(bulk_move_model)
     def post(self):
         """Move multiple content to another folder"""
-        data = self._controller.get_request_data()
-        working_folder_path, working_folder = self._controller.get_folder_context()
+        data = request.form
+
+        working_folder_path, working_folder = self._controller._get_folder_context(data)
 
         if 'entity_ids' not in data:
             abort(400, description="Content IDs are required under 'entity_ids' field")
@@ -273,7 +285,7 @@ class FolderBulkMoveResource(Resource):
         for entity_id in entity_ids:
             self._model_store.folder().move_to_folder(
                 entity_id=entity_id,
-                folder_id=working_folder if working_folder else None,
+                folder_id=working_folder.id if working_folder else None,
                 entity_is_folder=False,
                 entity=FolderEntity.CONTENT
             )
@@ -283,12 +295,12 @@ class FolderBulkMoveResource(Resource):
 
 class FolderResource(Resource):
 
-    @content_ns.expect(folder_model)
+    @content_ns.expect(folder_parser)
     @content_ns.marshal_with(folder_model, code=201)
     def post(self):
         """Add a new folder"""
-        data = self._controller.get_request_data()
-        working_folder_path, working_folder = self._controller.get_folder_context()
+        data = folder_parser.parse_args()
+        working_folder_path, working_folder = self._controller._get_folder_context(data)
 
         if 'name' not in data:
             abort(400, description="Name is required")
@@ -301,9 +313,11 @@ class FolderResource(Resource):
 
         return folder.to_dict(), 201
 
+    @content_ns.expect(path_parser)
     def delete(self):
         """Delete a folder"""
-        working_folder_path, working_folder = self._controller.get_folder_context()
+        data = path_parser.parse_args()
+        working_folder_path, working_folder = self._controller._get_folder_context(data)
 
         if not working_folder:
             abort(400, description="You can't delete this folder")
@@ -319,11 +333,11 @@ class FolderResource(Resource):
 
         return {'status': 'ok'}, 204
 
-    @content_ns.expect(folder_model)
+    @content_ns.expect(folder_parser)
     def put(self):
         """Update a folder"""
-        data = self._controller.get_request_data()
-        working_folder_path, working_folder = self._controller.get_folder_context()
+        data = folder_parser.parse_args()
+        working_folder_path, working_folder = self._controller._get_folder_context(data)
 
         if 'name' not in data:
             abort(400, description="Name is required")
@@ -337,4 +351,3 @@ class FolderResource(Resource):
         )
 
         return {'status': 'ok'}
-

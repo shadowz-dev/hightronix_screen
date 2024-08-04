@@ -98,7 +98,7 @@ class ContentManager(ModelManager):
         if slide_id:
             query = "{} {}".format(query, "AND slide_id = {}".format(slide_id))
 
-        if isinstance(folder_id, int):
+        if folder_id is not None:
             if folder_id == 0:
                 query = "{} {}".format(query, "AND folder_id is null")
             else:

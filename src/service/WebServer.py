@@ -41,12 +41,16 @@ class WebServer:
     def api(self) -> Api:
         return self._api
 
+    def get_max_upload_size(self):
+        return self._model_store.variable().map().get('slide_upload_limit').as_int() * 1024 * 1024
+
     def run(self) -> None:
         serve(
             self._app,
             host=self._model_store.config().map().get('bind'),
             port=self._model_store.config().map().get('port'),
-            threads=100
+            threads=100,
+            max_request_body_size=self.get_max_upload_size(),
         )
 
     def reload(self) -> None:
@@ -82,7 +86,7 @@ class WebServer:
         )
 
         self._app.config['UPLOAD_FOLDER'] = "{}/{}".format(WebDirConstant.FOLDER_STATIC, WebDirConstant.FOLDER_STATIC_WEB_UPLOADS)
-        self._app.config['MAX_CONTENT_LENGTH'] = self._model_store.variable().map().get('slide_upload_limit').as_int() * 1024 * 1024
+        self._app.config['MAX_CONTENT_LENGTH'] = self.get_max_upload_size()
         self._app.config['ERROR_404_HELP'] = False
 
         self._setup_flask_login()
