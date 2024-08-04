@@ -1,6 +1,8 @@
 jQuery(document).ready(function ($) {
     const main = function () {
-
+        $('.user-token-reveal').each(function() {
+            updateTokenReveal($(this), false);
+        });
     };
 
     $(document).on('click', '.user-add', function () {
@@ -15,6 +17,27 @@ jQuery(document).ready(function ($) {
         $('#user-edit-enabled').prop('checked', user.enabled);
         $('#user-edit-username').val(user.username);
         $('#user-edit-id').val(user.id);
+    });
+
+    const updateTokenReveal = function($btn, revealState) {
+        const $holder = $btn.parents('.user-item:eq(0)');
+        const $input = $holder.find('.input-token:eq(0)');
+        const $icon = $btn.find('i:eq(0)');
+        const isActive = revealState !== undefined ? !revealState : $icon.hasClass('fa-eye-slash');
+
+        if (isActive) {
+            $icon.removeClass('fa-eye-slash').addClass('fa-eye');
+            $btn.removeClass('btn-neutral').addClass('btn-other');
+            $input.val($input.attr('data-private'));
+        } else {
+            $icon.removeClass('fa-eye').addClass('fa-eye-slash');
+            $btn.removeClass('btn-other').addClass('btn-neutral');
+            $input.val($input.attr('data-public'));
+        }
+    };
+
+    $(document).on('click', '.user-token-reveal', function () {
+        updateTokenReveal($(this));
     });
 
     main();

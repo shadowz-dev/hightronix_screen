@@ -9,6 +9,7 @@ load_dotenv()
 
 class ConfigManager:
 
+    APPLICATION_NAME = "Obscreen"
     DEFAULT_PORT = 5000
     DEFAULT_PORT_HTTP_EXTERNAL_STORAGE = 5001
     VERSION_FILE = 'version.txt'
@@ -16,6 +17,7 @@ class ConfigManager:
     def __init__(self, replacers: Dict):
         self._replacers = replacers
         self._CONFIG = {
+            'application_name': self.APPLICATION_NAME,
             'version': None,
             'demo': False,
             'port_http_external_storage': self.DEFAULT_PORT_HTTP_EXTERNAL_STORAGE,
@@ -87,7 +89,7 @@ class ConfigManager:
         if args.log_stdout:
             self._CONFIG['log_stdout'] = args.log_stdout
         if args.version:
-            print("Obscreen version v{} (https://github.com/jr-k/obscreen)".format(self._CONFIG['version']))
+            print("{} version v{} (https://github.com/jr-k/obscreen)".format(self.APPLICATION_NAME, self._CONFIG['version']))
             sys.exit(0)
 
     def load_from_env(self) -> None:

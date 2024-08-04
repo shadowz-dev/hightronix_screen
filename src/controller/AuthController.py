@@ -69,6 +69,7 @@ class AuthController(ObController):
             'auth/list.jinja.html',
             error=request.args.get('error', None),
             users=self._model_store.user().get_users(exclude=User.DEFAULT_USER if demo else None),
+            plugin_core_api_enabled=self._model_store.variable().map().get('plugin_core_api_enabled').as_bool()
         )
 
     def auth_user_add(self):

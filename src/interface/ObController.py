@@ -48,3 +48,6 @@ class ObController(abc.ABC):
 
     def render_view(self, template_file: str, **parameters: dict) -> str:
         return self._template_renderer.render_view(template_file, self.plugin(), **parameters)
+
+    def api(self):
+        return self._web_server.api

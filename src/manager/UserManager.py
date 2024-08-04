@@ -15,6 +15,7 @@ class UserManager:
     TABLE_MODEL = [
         "username CHAR(255)",
         "password CHAR(255)",
+        "apikey CHAR(255)",
         "enabled INTEGER DEFAULT 1",
         "created_by CHAR(255)",
         "updated_by CHAR(255)",
@@ -79,8 +80,21 @@ class UserManager:
 
         return self.hydrate_object(object)
 
-    def get_one_by_username(self, username: str, enabled: bool = None) -> Optional[User]:
-        return self.get_one_by("username = '{}' and (enabled is null or enabled = {})".format(username, int(enabled)))
+    def get_one_by_username(self, username: str, enabled: Optional[bool] = None) -> Optional[User]:
+        query = " username = ? "
+
+        if enabled:
+            query = "{} {}".format(query, "AND enabled = {}".format(int(enabled)))
+
+        return self.get_one_by(query=query, values={"username": username})
+
+    def get_one_by_apikey(self, apikey: str, enabled: Optional[bool] = None) -> Optional[User]:
+        query = " apikey = ? "
+
+        if enabled:
+            query = "{} {}".format(query, "AND enabled = {}".format(int(enabled)))
+
+        return self.get_one_by(query=query, values={"apikey": apikey})
 
     def count_all_enabled(self):
         return len(self.get_by("enabled = 1"))

@@ -15,8 +15,34 @@
 					}
 
 					.tile-tail {
-						a:last-child {
+						.btn {
 							margin-left: 10px;
+						}
+
+						.btn:first-child {
+							margin-left: 0;
+						}
+					}
+
+					.tile-metrics {
+						flex: 1;
+						flex-direction: row;
+						justify-content: flex-start;
+						align-items: center;
+
+						.widget,
+						.form-group {
+							margin: 0;
+						}
+
+						label {
+							flex-grow: 0;
+						}
+
+						input {
+							margin-left: 10px;
+							margin-right: 10px;
+							max-width: 320px;
 						}
 					}
 				}
