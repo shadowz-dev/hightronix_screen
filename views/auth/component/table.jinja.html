@@ -6,6 +6,7 @@
             <div class="tile-body">
                 {{ truncate(user.username, 100, '...') }}
             </div>
+            {% if plugin_core_api_enabled %}
             <div class="tile-metrics">
                 <div class="form-group">
                     <div class="widget">
@@ -16,10 +17,13 @@
                     </div>
                 </div>
             </div>
+            {% endif %}
             <div class="tile-tail">
+                {% if plugin_core_api_enabled %}
                 <button type="button" class="btn btn-other user-token-reveal">
                     <i class="fa fa-eye"></i>
                 </button>
+                {% endif %}
                 <a href="javascript:void(0);" class="item-edit user-edit btn btn-info">
                     <i class="fa fa-pencil"></i>
                 </a>
