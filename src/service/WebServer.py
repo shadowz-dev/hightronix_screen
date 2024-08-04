@@ -122,7 +122,7 @@ class WebServer:
 
     def _setup_web_errors(self) -> None:
         def handle_error(error):
-            if request.headers.get('Content-Type') == 'application/json':
+            if request.headers.get('Content-Type') == 'application/json' or request.headers.get('Accept') == 'application/json':
                 response = jsonify({
                     'error': {
                         'code': error.code,
