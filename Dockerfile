@@ -8,7 +8,6 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     ntfs-3g \
     ffmpeg \
     build-essential \
-    linux-headers-$(uname -r) \
     curl \
     tar \
     bash \
