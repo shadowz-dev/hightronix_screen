@@ -20,6 +20,9 @@ class CoreApi(ObPlugin):
     def use_description(self):
         return self.translate('plugin_description')
 
+    def use_help_on_activation(self):
+        return self.translate('plugin_help_on_activation')
+
     def use_variables(self) -> List[Variable]:
         return []
 

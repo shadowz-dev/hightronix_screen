@@ -1,4 +1,5 @@
 {
   "plugin_title": "Core API",
-  "plugin_description": "Aggiunge funzionalità API che racchiudono le funzionalità di base"
+  "plugin_description": "Aggiunge funzionalità API che racchiudono le funzionalità di base",
+  "plugin_help_on_activation": "La documentazione sarà disponibile nella pagina /api"
 }

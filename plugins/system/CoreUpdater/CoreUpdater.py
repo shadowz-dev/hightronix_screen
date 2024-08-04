@@ -22,6 +22,9 @@ class GitUpdater(ObPlugin):
     def use_description(self):
         return self.translate('plugin_description')
 
+    def use_help_on_activation(self):
+        return None
+
     def use_variables(self) -> List[Variable]:
         return []
 

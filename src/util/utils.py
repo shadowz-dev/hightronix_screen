@@ -60,7 +60,6 @@ def camel_to_snake(camel: str) -> str:
 
 
 def str_datetime_to_cron(datetime_str: str) -> str:
-    print(datetime_str)
     datetime_obj = datetime.strptime(datetime_str, '%Y-%m-%d %H:%M')
     return "{} {} {} {} * {}".format(
         datetime_obj.minute,
