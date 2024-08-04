@@ -1,32 +1,55 @@
-from flask import Flask, render_template, jsonify, request, abort, make_response
-
+from flask import request, abort, jsonify
+from flask_restx import Resource, Namespace, fields
 from src.model.entity.Playlist import Playlist
 from src.interface.ObController import ObController
+
+# Namespace pour les opérations sur les playlists
+playlist_ns = Namespace('playlists', description='Playlist operations')
+
+# Modèle d'entrée pour la playlist
+playlist_model = playlist_ns.model('Playlist', {
+    'name': fields.String(required=True, description='The playlist name'),
+    'enabled': fields.Boolean(default=True, description='Is the playlist enabled?'),
+    'time_sync': fields.Boolean(default=False, description='Is time synchronization enabled?')
+})
+
+# Modèle de sortie pour la playlist
+playlist_output_model = playlist_ns.model('PlaylistOutput', {
+    'id': fields.Integer(readOnly=True, description='The unique identifier of a playlist'),
+    'name': fields.String(required=True, description='The playlist name'),
+    'enabled': fields.Boolean(description='Is the playlist enabled?'),
+    'time_sync': fields.Boolean(description='Is time synchronization enabled?')
+})
 
 
 class PlaylistApiController(ObController):
 
     def register(self):
-        self._app.add_url_rule('/api/playlist', 'api_playlist_list', self.get_playlists, methods=['GET'])
-        self._app.add_url_rule('/api/playlist', 'api_playlist_add', self.add_playlist, methods=['POST'])
-        self._app.add_url_rule('/api/playlist/<int:playlist_id>', 'api_playlist_get', self.get_playlist, methods=['GET'])
-        self._app.add_url_rule('/api/playlist/<int:playlist_id>', 'api_playlist_update', self.update_playlist, methods=['PUT'])
-        self._app.add_url_rule('/api/playlist/<int:playlist_id>', 'api_playlist_delete', self.delete_playlist, methods=['DELETE'])
-        self._app.add_url_rule('/api/playlist/<int:playlist_id>/slides', 'api_playlist_list_slides', self.get_playlists_slides, methods=['GET'])
-        self._app.add_url_rule('/api/playlist/<int:playlist_id>/notifications', 'api_playlist_list_notifications', self.get_playlists_notifications, methods=['GET'])
+        self.api().add_namespace(playlist_ns, path='/api/playlists')
+        playlist_ns.add_resource(self.create_resource(PlaylistResource), '/<int:playlist_id>')
+        playlist_ns.add_resource(self.create_resource(PlaylistListResource), '/')
+        playlist_ns.add_resource(self.create_resource(PlaylistSlidesResource), '/<int:playlist_id>/slides')
+        playlist_ns.add_resource(self.create_resource(PlaylistNotificationsResource), '/<int:playlist_id>/notifications')
 
-    def get_playlists(self):
+    def create_resource(self, resource_class):
+        # Function to inject dependencies into resources
+        return type(f'{resource_class.__name__}WithDependencies', (resource_class,), {
+            '_model_store': self._model_store
+        })
+
+
+class PlaylistListResource(Resource):
+    @playlist_ns.marshal_list_with(playlist_output_model)
+    def get(self):
+        """List all playlists"""
         playlists = self._model_store.playlist().get_all(sort="created_at", ascending=True)
         result = [playlist.to_dict() for playlist in playlists]
-        return jsonify(result)
+        return result
 
-    def get_playlist(self, playlist_id: int):
-        playlist = self._model_store.playlist().get(playlist_id)
-        if not playlist:
-            abort(404, description="Playlist not found")
-        return jsonify(playlist.to_dict())
-
-    def add_playlist(self):
+    @playlist_ns.expect(playlist_model)
+    @playlist_ns.marshal_with(playlist_output_model, code=201)
+    def post(self):
+        """Create a new playlist"""
         data = request.get_json()
         if not data or 'name' not in data:
             abort(400, description="Invalid input")
@@ -42,12 +65,24 @@ class PlaylistApiController(ObController):
         except Exception as e:
             abort(409, description=str(e))
 
-        return jsonify(playlist.to_dict()), 201
+        return playlist.to_dict(), 201
 
-    def update_playlist(self, playlist_id: int):
+
+class PlaylistResource(Resource):
+
+    @playlist_ns.marshal_with(playlist_output_model)
+    def get(self, playlist_id):
+        """Get a playlist by its ID"""
+        playlist = self._model_store.playlist().get(playlist_id)
+        if not playlist:
+            abort(404, description="Playlist not found")
+        return playlist.to_dict()
+
+    @playlist_ns.expect(playlist_model)
+    @playlist_ns.marshal_with(playlist_output_model)
+    def put(self, playlist_id):
+        """Update an existing playlist"""
         data = request.get_json()
-        if not data or 'name' not in data:
-            abort(400, description="Invalid input")
 
         playlist = self._model_store.playlist().get(playlist_id)
         if not playlist:
@@ -60,9 +95,10 @@ class PlaylistApiController(ObController):
             enabled=data.get('enabled', playlist.enabled)
         )
         updated_playlist = self._model_store.playlist().get(playlist_id)
-        return jsonify(updated_playlist.to_dict())
+        return updated_playlist.to_dict()
 
-    def delete_playlist(self, playlist_id: int):
+    def delete(self, playlist_id):
+        """Delete a playlist"""
         playlist = self._model_store.playlist().get(playlist_id)
         if not playlist:
             abort(404, description="Playlist not found")
@@ -76,7 +112,11 @@ class PlaylistApiController(ObController):
         self._model_store.playlist().delete(playlist_id)
         return '', 204
 
-    def get_playlists_slides(self, playlist_id: int):
+
+class PlaylistSlidesResource(Resource):
+
+    def get(self, playlist_id):
+        """Get slides associated with a playlist"""
         playlist = self._model_store.playlist().get(playlist_id)
 
         if not playlist:
@@ -87,7 +127,11 @@ class PlaylistApiController(ObController):
         result = [slide.to_dict() for slide in slides]
         return jsonify(result)
 
-    def get_playlists_notifications(self, playlist_id: int):
+
+class PlaylistNotificationsResource(Resource):
+
+    def get(self, playlist_id):
+        """Get notifications associated with a playlist"""
         playlist = self._model_store.playlist().get(playlist_id)
 
         if not playlist:

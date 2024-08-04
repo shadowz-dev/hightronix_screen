@@ -165,7 +165,7 @@ GROUP BY playlist_id;
             return
 
         form = {
-            "name": name,
+            "name": name if isinstance(name, str) else slide.name,
             "time_sync": time_sync if isinstance(time_sync, bool) else slide.time_sync,
             "enabled": enabled if isinstance(enabled, bool) else slide.enabled,
         }

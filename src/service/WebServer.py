@@ -4,6 +4,7 @@ from waitress import serve
 
 from flask import Flask, send_from_directory, redirect, url_for, request, jsonify, make_response
 from flask_login import LoginManager, current_user
+from flask_restx import Api
 
 from src.manager.UserManager import UserManager
 from src.service.ModelStore import ModelStore
@@ -27,6 +28,7 @@ class WebServer:
 
     def __init__(self, kernel, model_store: ModelStore, template_renderer: TemplateRenderer):
         self._app = None
+        self._api = None
         self._auth_enabled = False
         self._login_manager = None
         self._kernel = kernel
@@ -34,6 +36,10 @@ class WebServer:
         self._template_renderer = template_renderer
         self._debug = self._model_store.config().map().get('debug')
         self.setup()
+
+    @property
+    def api(self) -> Api:
+        return self._api
 
     def run(self) -> None:
         serve(
@@ -51,6 +57,7 @@ class WebServer:
         self._setup_web_globals()
         self._setup_web_errors()
         self._setup_web_controllers()
+        self._setup_api()
 
     def get_app(self):
         return self._app
@@ -76,6 +83,7 @@ class WebServer:
 
         self._app.config['UPLOAD_FOLDER'] = "{}/{}".format(WebDirConstant.FOLDER_STATIC, WebDirConstant.FOLDER_STATIC_WEB_UPLOADS)
         self._app.config['MAX_CONTENT_LENGTH'] = self._model_store.variable().map().get('slide_upload_limit').as_int() * 1024 * 1024
+        self._app.config['ERROR_404_HELP'] = False
 
         self._setup_flask_login()
 
@@ -114,6 +122,16 @@ class WebServer:
         FleetNodePlayerGroupController(self._kernel, self, self._app, self.auth_required, self._model_store, self._template_renderer)
         PlaylistController(self._kernel, self, self._app, self.auth_required, self._model_store, self._template_renderer)
         AuthController(self._kernel, self, self._app, self.auth_required, self._model_store, self._template_renderer)
+
+    def _setup_api(self) -> None:
+        self._api = Api(
+            self._app,
+            version=self._model_store.config().map().get('version'),
+            title="{} {}".format(self._model_store.config().map().get('application_name'), "API"),
+            description='API Documentation with Swagger',
+            endpoint='api',
+            doc='/api'
+        )
 
     def _setup_web_globals(self) -> None:
         @self._app.context_processor
