@@ -23,7 +23,7 @@ class User:
     def set_new_apikey(self) -> str:
         self._apikey = str(uuid.uuid4())
 
-        return self._uuid
+        return self._apikey
 
     @property
     def id(self) -> Optional[int]:

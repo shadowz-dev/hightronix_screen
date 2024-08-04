@@ -4,7 +4,7 @@ from waitress import serve
 from functools import wraps
 
 from flask import Flask, send_from_directory, redirect, url_for, request, jsonify, make_response, abort
-from flask_login import LoginManager, current_user
+from flask_login import LoginManager, current_user, login_user
 from flask_restx import Api
 
 from src.manager.UserManager import UserManager
@@ -200,6 +200,7 @@ def create_require_api_key_decorator(web_server: WebServer):
                 user = web_server._model_store.user().get_one_by_apikey(apikey)
 
                 if user:
+                    login_user(user)
                     return user
 
                 return abort(403, 'Forbidden: You do not have access to this resource.')

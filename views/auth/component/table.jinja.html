@@ -1,12 +1,25 @@
 <div class="tiles users">
     <div class="tiles-inner">
     {% for user in users %}
-        <div class="user-item tile-item {% if not user.enabled %}disabled{% endif %}" data-level="{{ user.id }}"
+        <div class="user-item tile-item {% if not user.enabled %}disabled{% endif %}" data-id="{{ user.id }}"
             data-entity="{{ user.to_json({"created_by": track_created(user).username, "updated_by": track_updated(user).username}) }}">
             <div class="tile-body">
                 {{ truncate(user.username, 100, '...') }}
             </div>
+            <div class="tile-metrics">
+                <div class="form-group">
+                    <div class="widget">
+                        <label for="">
+                            Token:
+                        </label>
+                        <input type="text" class="input-token disabled" disabled value="{{ user.apikey|length * 2 * '•' }}" data-public="{{ user.apikey }}" data-private="{{ user.apikey|length * 2 * '•' }}">
+                    </div>
+                </div>
+            </div>
             <div class="tile-tail">
+                <button type="button" class="btn btn-other user-token-reveal">
+                    <i class="fa fa-eye"></i>
+                </button>
                 <a href="javascript:void(0);" class="item-edit user-edit btn btn-info">
                     <i class="fa fa-pencil"></i>
                 </a>
