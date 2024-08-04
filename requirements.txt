@@ -1,8 +1,8 @@
 flask==2.3.3
-flask-restx
-flask-login
+flask-restx==1.3.0
 python-dotenv
 cron-descriptor
 waitress
+flask-login
 pysqlite3
 psutil
