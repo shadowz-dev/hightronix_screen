@@ -165,9 +165,9 @@ GROUP BY playlist_id;
             return
 
         form = {
-            "name": name if isinstance(name, str) else slide.name,
-            "time_sync": time_sync if isinstance(time_sync, bool) else slide.time_sync,
-            "enabled": enabled if isinstance(enabled, bool) else slide.enabled,
+            "name": name if isinstance(name, str) else playlist.name,
+            "time_sync": time_sync if isinstance(time_sync, bool) else playlist.time_sync,
+            "enabled": enabled if isinstance(enabled, bool) else playlist.enabled,
         }
 
         self._db.update_by_id(self.TABLE_NAME, id, self.pre_update(form))

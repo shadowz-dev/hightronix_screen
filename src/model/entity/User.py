@@ -1,5 +1,6 @@
 import json
 import time
+import uuid
 
 from typing import Optional, Union
 
@@ -8,15 +9,21 @@ class User:
 
     DEFAULT_USER = 'admin'
 
-    def __init__(self, username: str = '', password: str = '', enabled: bool = True, id: Optional[int] = None, created_by: Optional[str] = None, updated_by: Optional[str] = None, created_at: Optional[int] = None, updated_at: Optional[int] = None):
+    def __init__(self, username: str = '', password: str = '', apikey: str = '', enabled: bool = True, id: Optional[int] = None, created_by: Optional[str] = None, updated_by: Optional[str] = None, created_at: Optional[int] = None, updated_at: Optional[int] = None):
         self._id = id if id else None
         self._username = username
         self._password = password
+        self._apikey = apikey if apikey else self.set_new_apikey()
         self._enabled = enabled
         self._created_by = created_by if created_by else None
         self._updated_by = updated_by if updated_by else None
         self._created_at = int(created_at if created_at else time.time())
         self._updated_at = int(updated_at if updated_at else time.time())
+
+    def set_new_apikey(self) -> str:
+        self._apikey = str(uuid.uuid4())
+
+        return self._uuid
 
     @property
     def id(self) -> Optional[int]:
@@ -37,6 +44,14 @@ class User:
     @password.setter
     def password(self, value: str):
         self._password = value
+
+    @property
+    def apikey(self) -> str:
+        return self._apikey
+
+    @apikey.setter
+    def apikey(self, value: str):
+        self._apikey = value
 
     @property
     def enabled(self) -> bool:

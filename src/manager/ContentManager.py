@@ -201,7 +201,7 @@ class ContentManager(ModelManager):
                     content.duration = mp4_duration_with_ffprobe(content.location)
 
         else:
-            content.location = location
+            content.location = location if location else ''
 
         self.add_form(content)
         return self.get_one_by(query="uuid = '{}'".format(content.uuid))

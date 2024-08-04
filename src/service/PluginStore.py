@@ -3,6 +3,7 @@ import shutil
 import logging
 import inspect
 import importlib
+from pathlib import Path
 
 from src.interface.ObPlugin import ObPlugin
 from src.interface.ObController import ObController
@@ -55,6 +56,9 @@ class PluginStore:
         return self._hooks
 
     def find_plugins_in_directory(self, directory: str) -> list:
+        plugin_type = Path(directory).stem.capitalize()
+        logging.info("#")
+        logging.info("[plugin] {}...".format(plugin_type))
         plugins = []
         for root, dirs, files in os.walk('{}/{}'.format(self._kernel.get_application_dir(), directory)):
             for file in files:

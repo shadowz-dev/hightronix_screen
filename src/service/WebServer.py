@@ -1,8 +1,9 @@
 import os
 import time
 from waitress import serve
+from functools import wraps
 
-from flask import Flask, send_from_directory, redirect, url_for, request, jsonify, make_response
+from flask import Flask, send_from_directory, redirect, url_for, request, jsonify, make_response, abort
 from flask_login import LoginManager, current_user
 from flask_restx import Api
 
@@ -29,7 +30,6 @@ class WebServer:
     def __init__(self, kernel, model_store: ModelStore, template_renderer: TemplateRenderer):
         self._app = None
         self._api = None
-        self._auth_enabled = False
         self._login_manager = None
         self._kernel = kernel
         self._model_store = model_store
@@ -104,9 +104,12 @@ class WebServer:
         def load_user(user_id):
             return self._model_store.user().get(user_id)
 
+    def is_auth_enabled(self) -> bool:
+        return self._model_store.variable().map().get('auth_enabled').as_bool()
+
     def auth_required(self, f):
         def decorated_function(*args, **kwargs):
-            if not self._model_store.variable().map().get('auth_enabled').as_bool():
+            if not self.is_auth_enabled():
                 return f(*args, **kwargs)
 
             if not current_user.is_authenticated:
@@ -128,13 +131,28 @@ class WebServer:
         AuthController(self._kernel, self, self._app, self.auth_required, self._model_store, self._template_renderer)
 
     def _setup_api(self) -> None:
+        security = None
+        authorizations = None
+
+        if self.is_auth_enabled():
+            security = 'apikey'
+            authorizations = {
+                'apikey': {
+                    'type': 'apiKey',
+                    'in': 'header',
+                    'name': 'Authorization'
+                }
+            }
+
         self._api = Api(
             self._app,
             version=self._model_store.config().map().get('version'),
             title="{} {}".format(self._model_store.config().map().get('application_name'), "API"),
             description='API Documentation with Swagger',
             endpoint='api',
-            doc='/api'
+            doc='/api',
+            security=security,
+            authorizations=authorizations
         )
 
     def _setup_web_globals(self) -> None:
@@ -163,3 +181,31 @@ class WebServer:
         self._app.register_error_handler(409, handle_error)
         self._app.register_error_handler(HttpClientException, handle_error)
 
+
+def create_require_api_key_decorator(web_server: WebServer):
+    def require_api_key(f):
+        @wraps(f)
+        def decorated_function(*args, **kwargs):
+            if not web_server.is_auth_enabled():
+                return
+
+            auth_header = request.headers.get('Authorization')
+
+            if auth_header:
+                apikey = auth_header
+                parts = auth_header.split()
+                if parts[0].lower() == 'bearer':
+                    apikey = parts[1]
+
+                user = web_server._model_store.user().get_one_by_apikey(apikey)
+
+                if user:
+                    return user
+
+                return abort(403, 'Forbidden: You do not have access to this resource.')
+
+            return abort(401, 'Invalid or missing API key.')
+
+        return decorated_function()
+
+    return require_api_key

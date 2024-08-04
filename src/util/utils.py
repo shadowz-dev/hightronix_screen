@@ -325,3 +325,14 @@ def slugify_next(slug: str) -> str:
         return f"{parts[0]}-{next_number}"
     else:
         return f"{slug}-1"
+
+
+def str_to_bool(value):
+    if isinstance(value, bool):
+        return value
+    if value.lower() in {'false', 'f', '0', 'no', 'n'}:
+        return False
+    elif value.lower() in {'true', 't', '1', 'yes', 'y'}:
+        return True
+    else:
+        raise ValueError('Boolean value expected.')

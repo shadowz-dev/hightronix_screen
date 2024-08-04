@@ -1,31 +1,14 @@
+import time
+
 from flask import request, abort, jsonify
 from flask_restx import Resource, Namespace, fields
 from src.model.entity.Slide import Slide
 from src.interface.ObController import ObController
-from src.util.utils import str_datetime_to_cron, str_weekdaytime_to_cron
-import time
+from src.util.utils import str_datetime_to_cron, str_weekdaytime_to_cron, str_to_bool
+from src.service.WebServer import create_require_api_key_decorator
 
 # Namespace for slide operations
 slide_ns = Namespace('slides', description='Operations on slides')
-
-# Input model for adding/editing a slide
-slide_model = slide_ns.model('Slide', {
-    'content_id': fields.Integer(required=True, description='The content ID for the slide'),
-    'playlist_id': fields.Integer(required=True, description='The playlist ID to which the slide belongs'),
-    'enabled': fields.Boolean(default=True, description='Is the slide enabled?'),
-    'delegate_duration': fields.Boolean(default=False, description='Should the duration be delegated?'),
-    'duration': fields.Integer(default=3, description='Duration of the slide'),
-    'position': fields.Integer(default=999, description='Position of the slide'),
-    'scheduling': fields.String(description='Scheduling type: loop, datetime, or inweek'),
-    'datetime_start': fields.String(description='Start datetime for scheduling'),
-    'datetime_end': fields.String(description='End datetime for scheduling'),
-    'day_start': fields.Integer(description='Start day for inweek scheduling'),
-    'time_start': fields.String(description='Start time for inweek scheduling'),
-    'day_end': fields.Integer(description='End day for inweek scheduling'),
-    'time_end': fields.String(description='End time for inweek scheduling'),
-    'cron_start': fields.String(description='Cron expression for scheduling start'),
-    'cron_end': fields.String(description='Cron expression for scheduling end'),
-})
 
 # Output model for a slide
 slide_output_model = slide_ns.model('SlideOutput', {
@@ -46,11 +29,51 @@ positions_model = slide_ns.model('SlidePositions', {
     'positions': fields.Raw(required=True, description='A dictionary where keys are slide IDs and values are their new positions')
 })
 
+# Parser for basic slide attributes
+slide_base_parser = slide_ns.parser()
+slide_base_parser.add_argument('content_id', type=int, required=True, help='The content ID for the slide')
+slide_base_parser.add_argument('playlist_id', type=int, required=True, help='The playlist ID to which the slide belongs')
+slide_base_parser.add_argument('enabled', type=str_to_bool, default=None, help='Is the slide enabled?')
+slide_base_parser.add_argument('duration', type=int, default=3, help='Duration of the slide')
+slide_base_parser.add_argument('position', type=int, default=999, help='Position of the slide')
+
+# Parser for slide attributes (add)
+slide_parser = slide_base_parser.copy()
+slide_parser.add_argument('scheduling', type=str, required=True, help='Scheduling type: loop, datetime or inweek')
+slide_parser.add_argument('delegate_duration', type=str_to_bool, default=None, help='Should the duration be delegated to video\'s duration?')
+slide_parser.add_argument('datetime_start', type=str, required=False, help='Start datetime for scheduling (format: Y-m-d H:M)')
+slide_parser.add_argument('datetime_end', type=str, required=False, help='End datetime for scheduling (format: Y-m-d H:M)')
+slide_parser.add_argument('day_start', type=int, required=False, help='Start day for inweek scheduling (format: 1 for Monday to 7 for Sunday)')
+slide_parser.add_argument('time_start', type=str, required=False, help='Start time for inweek scheduling (format: H:M)')
+slide_parser.add_argument('day_end', type=int, required=False, help='End day for inweek scheduling (format: 1 for Monday to 7 for Sunday)')
+slide_parser.add_argument('time_end', type=str, required=False, help='End time for inweek scheduling (format: H:M)')
+
+# Parser for slide notification attributes (add)
+slide_notification_parser = slide_base_parser.copy()
+slide_notification_parser.add_argument('scheduling', type=str, required=True, help='Scheduling type: datetime or cron')
+slide_notification_parser.add_argument('datetime_start', type=str, required=False, help='Start datetime for notification scheduling (format: Y-m-d H:M)')
+slide_notification_parser.add_argument('datetime_end', type=str, required=False, help='End datetime for notification scheduling (format: Y-m-d H:M)')
+slide_notification_parser.add_argument('cron_start', type=str, required=False, help='Cron expression for notification scheduling start (format: * * * * * * *)')
+slide_notification_parser.add_argument('cron_end', type=str, required=False, help='Cron expression for notification scheduling end (format: * * * * * * *)')
+
+# Parser for slide attributes (update)
+slide_edit_parser = slide_parser.copy()
+slide_edit_parser.replace_argument('scheduling', type=str, required=False, help='Scheduling type: loop, datetime, or inweek')
+slide_edit_parser.replace_argument('content_id', type=int, required=False, help='The content ID for the slide')
+slide_edit_parser.replace_argument('playlist_id', type=int, required=False, help='The playlist ID to which the slide belongs')
+
+# Parser for slide notification attributes (update)
+slide_notification_edit_parser = slide_notification_parser.copy()
+slide_notification_edit_parser.replace_argument('scheduling', type=str, required=False, help='Scheduling type: datetime or cron')
+slide_notification_edit_parser.replace_argument('content_id', type=int, required=False, help='The content ID for the slide')
+slide_notification_edit_parser.replace_argument('playlist_id', type=int, required=False, help='The playlist ID to which the slide belongs')
+
 
 class SlideApiController(ObController):
 
     def register(self):
         self.api().add_namespace(slide_ns, path='/api/slides')
+        slide_ns.add_resource(self.create_resource(SlideNotificationResource), '/notifications/<int:slide_id>')
         slide_ns.add_resource(self.create_resource(SlideResource), '/<int:slide_id>')
         slide_ns.add_resource(self.create_resource(SlideAddResource), '/')
         slide_ns.add_resource(self.create_resource(SlideAddNotificationResource), '/notifications')
@@ -60,7 +83,8 @@ class SlideApiController(ObController):
         # Function to inject dependencies into resources
         return type(f'{resource_class.__name__}WithDependencies', (resource_class,), {
             '_model_store': self._model_store,
-            '_controller': self
+            '_controller': self,
+            'require_api_key': create_require_api_key_decorator(self._web_server)
         })
 
     def _add_slide_or_notification(self, data, is_notification=False):
@@ -80,8 +104,8 @@ class SlideApiController(ObController):
 
         slide = Slide(
             content_id=data.get('content_id'),
-            enabled=data.get('enabled', True),
-            delegate_duration=data.get('delegate_duration', False),
+            enabled=data.get('enabled') if data.get('enabled') is not None else True,
+            delegate_duration=data.get('delegate_duration') if data.get('delegate_duration') is not None else False,
             duration=data.get('duration', 3),
             position=data.get('position', 999),
             is_notification=is_notification,
@@ -166,21 +190,23 @@ class SlideApiController(ObController):
 
 class SlideAddResource(Resource):
 
-    @slide_ns.expect(slide_model)
+    @slide_ns.expect(slide_parser)
     @slide_ns.marshal_with(slide_output_model, code=201)
     def post(self):
         """Add a new slide"""
-        data = request.get_json()
+        self.require_api_key()
+        data = slide_parser.parse_args()
         return self._controller._add_slide_or_notification(data, is_notification=False)
 
 
 class SlideAddNotificationResource(Resource):
 
-    @slide_ns.expect(slide_model)
+    @slide_ns.expect(slide_notification_parser)
     @slide_ns.marshal_with(slide_output_model, code=201)
     def post(self):
-        """Add a new slide"""
-        data = request.get_json()
+        """Add a new slide notification"""
+        self.require_api_key()
+        data = slide_notification_parser.parse_args()
         return self._controller._add_slide_or_notification(data, is_notification=True)
 
 
@@ -189,16 +215,18 @@ class SlideResource(Resource):
     @slide_ns.marshal_with(slide_output_model)
     def get(self, slide_id):
         """Get a slide by its ID"""
+        self.require_api_key()
         slide = self._model_store.slide().get(slide_id)
         if not slide:
             abort(404, description="Slide not found")
         return slide.to_dict()
 
-    @slide_ns.expect(slide_model)
+    @slide_ns.expect(slide_edit_parser)
     @slide_ns.marshal_with(slide_output_model)
     def put(self, slide_id):
         """Edit an existing slide"""
-        data = request.get_json()
+        self.require_api_key()
+        data = slide_edit_parser.parse_args()
 
         slide = self._model_store.slide().get(slide_id)
         if not slide:
@@ -207,7 +235,54 @@ class SlideResource(Resource):
         cron_schedule_start = slide.cron_schedule
         cron_schedule_end = slide.cron_schedule_end
 
-        if 'scheduling' in data:
+        if data.get('scheduling'):
+            cron_schedule_start, cron_schedule_end = self._controller._resolve_scheduling(data, is_notification=slide.is_notification)
+
+        self._model_store.slide().update_form(
+            id=slide_id,
+            content_id=data.get('content_id', slide.content_id),
+            enabled=data.get('enabled', slide.enabled),
+            position=data.get('position', slide.position),
+            duration=data.get('duration', slide.duration),
+            cron_schedule=cron_schedule_start,
+            cron_schedule_end=cron_schedule_end
+        )
+        self._controller._post_update()
+
+        updated_slide = self._model_store.slide().get(slide_id)
+        return updated_slide.to_dict()
+
+    def delete(self, slide_id):
+        """Delete a slide"""
+        self.require_api_key()
+        slide = self._model_store.slide().get(slide_id)
+
+        if not slide:
+            abort(404, description="Slide not found")
+
+        self._model_store.slide().delete(slide_id)
+        self._controller._post_update()
+
+        return '', 204
+
+
+class SlideNotificationResource(Resource):
+
+    @slide_ns.expect(slide_notification_edit_parser)
+    @slide_ns.marshal_with(slide_output_model)
+    def put(self, slide_id):
+        """Edit an existing slide notification"""
+        self.require_api_key()
+        data = slide_notification_edit_parser.parse_args()
+
+        slide = self._model_store.slide().get(slide_id)
+        if not slide:
+            abort(404, description="Slide not found")
+
+        cron_schedule_start = slide.cron_schedule
+        cron_schedule_end = slide.cron_schedule_end
+
+        if data.get('scheduling'):
             cron_schedule_start, cron_schedule_end = self._controller._resolve_scheduling(data, is_notification=slide.is_notification)
 
         self._model_store.slide().update_form(
@@ -225,24 +300,13 @@ class SlideResource(Resource):
         updated_slide = self._model_store.slide().get(slide_id)
         return updated_slide.to_dict()
 
-    def delete(self, slide_id):
-        """Delete a slide"""
-        slide = self._model_store.slide().get(slide_id)
-
-        if not slide:
-            abort(404, description="Slide not found")
-
-        self._model_store.slide().delete(slide_id)
-        self._controller._post_update()
-
-        return '', 204
-
 
 class SlidePositionResource(Resource):
 
     @slide_ns.expect(positions_model)
     def post(self):
         """Update positions of multiple slides"""
+        self.require_api_key()
         data = request.get_json()
         positions = data.get('positions', None) if data else None
 

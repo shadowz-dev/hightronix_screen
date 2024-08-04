@@ -144,8 +144,8 @@ class SlideManager(ModelManager):
             return
 
         form = {
-            "duration": duration if duration else slide.duration,
-            "content_id": content_id if content_id else slide.content_id,
+            "duration": duration if isinstance(duration, int) else slide.duration,
+            "content_id": content_id if isinstance(content_id, int) else slide.content_id,
             "position": position if isinstance(position, int) else slide.position,
             "enabled": enabled if isinstance(enabled, bool) else slide.enabled,
             "delegate_duration": delegate_duration if isinstance(delegate_duration, bool) else slide.delegate_duration,
