@@ -7,7 +7,7 @@ RUN apk add --no-cache gcc musl-dev sqlite-dev ntfs-3g ffmpeg build-base linux-h
 RUN apk add --no-cache curl \
     && curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y \
     && source $HOME/.cargo/env \
-    && rustup default stable \
+    && rustup default stable
 
 WORKDIR /app
 
