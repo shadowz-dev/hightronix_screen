@@ -10,14 +10,20 @@ from src.util.utils import am_i_in_docker
 
 class GitUpdater(ObPlugin):
 
+    def get_version(self) -> str:
+        return '1.0'
+
     def use_id(self):
-        return 'git_updater'
+        return 'core_updater'
 
     def use_title(self):
         return self.translate('plugin_title')
 
     def use_description(self):
         return self.translate('plugin_description')
+
+    def use_help_on_activation(self):
+        return None
 
     def use_variables(self) -> List[Variable]:
         return []

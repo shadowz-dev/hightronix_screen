@@ -39,11 +39,19 @@ class ObPlugin(abc.ABC):
         pass
 
     @abc.abstractmethod
+    def use_help_on_activation(self) -> Optional[str]:
+        pass
+
+    @abc.abstractmethod
     def use_variables(self) -> List[Variable]:
         pass
 
     @abc.abstractmethod
     def use_hooks_registrations(self) -> List[HookRegistration]:
+        pass
+
+    @abc.abstractmethod
+    def get_version(self) -> str:
         pass
 
     def get_directory(self) -> Optional[str]:
@@ -82,7 +90,10 @@ class ObPlugin(abc.ABC):
     def add_functional_hook_registration(self, hook: HookType, priority: int = 0, function=None) -> FunctionalHookRegistration:
         return FunctionalHookRegistration(plugin=self, hook=hook, priority=priority, function=function)
 
-    def translate(self, token, resolve=False) -> Union[Dict, str]:
+    def translate(self, token, resolve=True) -> Union[Dict, str]:
+        if not token:
+            token = '<UNKNOWN>'
+
         token = token if token.startswith(self.use_id()) else "{}_{}".format(self.use_id(), token)
         return self._model_store.lang().translate(token) if resolve else token
 

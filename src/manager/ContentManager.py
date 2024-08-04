@@ -92,14 +92,17 @@ class ContentManager(ModelManager):
         for content_id, edits in edits_contents.items():
             self._db.update_by_id(self.TABLE_NAME, content_id, edits)
 
-    def get_contents(self, slide_id: Optional[id] = None, folder_id: Optional[id] = None) -> List[Content]:
+    def get_contents(self, slide_id: Optional[int] = None, folder_id: Optional[int] = None) -> List[Content]:
         query = " 1=1 "
 
         if slide_id:
             query = "{} {}".format(query, "AND slide_id = {}".format(slide_id))
 
-        if folder_id:
-            query = "{} {}".format(query, "AND folder_id = {}".format(folder_id))
+        if folder_id is not None:
+            if folder_id == 0:
+                query = "{} {}".format(query, "AND folder_id is null")
+            else:
+                query = "{} {}".format(query, "AND folder_id = {}".format(folder_id))
 
         return self.get_by(query=query)
 
@@ -198,7 +201,7 @@ class ContentManager(ModelManager):
                     content.duration = mp4_duration_with_ffprobe(content.location)
 
         else:
-            content.location = location
+            content.location = location if location else ''
 
         self.add_form(content)
         return self.get_one_by(query="uuid = '{}'".format(content.uuid))
