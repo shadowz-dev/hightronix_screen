@@ -14,13 +14,6 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     bash \
     && rm -rf /var/lib/apt/lists/*
 
-# Install Rust using rustup
-#RUN curl https://sh.rustup.rs -sSf | sh -s -- -y --default-toolchain stable \
-#    && . "$HOME/.cargo/env"
-
-# Set environment variable to add Rust to the path
-#ENV PATH="/root/.cargo/bin:${PATH}"
-
 WORKDIR /app
 
 COPY . .
