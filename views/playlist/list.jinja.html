@@ -44,6 +44,27 @@
         }
         var contents = {{ json_dumps(contents) | safe }}
     </script>
+    <script>
+        jQuery(function($) {
+            if (typeof chrome !== 'undefined') {
+                $('.chrome-only').removeClass('hidden');
+
+                var script_sender = document.createElement('script');
+                script_sender.src = "{{ STATIC_PREFIX }}js/lib/cast-sender.js";
+                document.body.appendChild(script_sender);
+
+                if (document.location.protocol.indexOf('https') === 0) {
+                    var script_caster = document.createElement('script');
+                    script_caster.src = "{{ STATIC_PREFIX }}js/cast-url.js";
+                    document.body.appendChild(script_caster);
+                } else {
+                    $(document).on('click', '.cast-url', function() {
+                        window.open('https://cast.obscreen.io/sender.html?url=' + encodeURIComponent($('#' + $(this).attr('data-target-id')).val()));
+                    });
+                }
+            }
+        });
+    </script>
     <script src="{{ STATIC_PREFIX }}js/lib/jquery-explr-1.4.js"></script>
     <script src="{{ STATIC_PREFIX }}js/lib/jquery-ui.min.js"></script>
     <script src="{{ STATIC_PREFIX }}js/lib/flatpickr.min.js"></script>
@@ -52,13 +73,14 @@
     <script src="{{ STATIC_PREFIX }}js/slideshow/slides.js"></script>
     <script src="{{ STATIC_PREFIX }}js/playlist/playlists.js"></script>
     <script src="{{ STATIC_PREFIX }}js/explorer.js"></script>
+
     {{ HOOK(H_PLAYLIST_JAVASCRIPT) }}
 {% endblock %}
 
 {% block body_class %}view-playlist-list{% endblock %}
 
 {% block page %}
-    <div class="top-content">
+    <div class="top-content chrome-only hidden">
         <div class="top-actions">
             {{ HOOK(H_PLAYLIST_TOOLBAR_ACTIONS_START) }}
             <button type="button" class="btn btn-info playlist-add item-add">
