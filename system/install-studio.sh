@@ -25,7 +25,7 @@ sudo apt-get install -y git python3-pip python3-venv libsqlite3-dev ntfs-3g ffmp
 cd $WORKING_DIR
 git clone https://github.com/jr-k/obscreen.git
 cd obscreen
-chown -R pi:pi ./
+chown -R $USER:$USER ./
 
 # Install application dependencies
 python3 -m venv venv
