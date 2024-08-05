@@ -18,8 +18,8 @@ echo "# Waiting 3 seconds before installation..."
 sleep 3
 
 # Install system dependencies
-sudo apt-get update
-sudo apt-get install -y git python3-pip python3-venv libsqlite3-dev ntfs-3g ffmpeg
+apt-get update
+apt-get install -y git python3-pip python3-venv libsqlite3-dev ntfs-3g ffmpeg
 
 # Get files
 cd $WORKING_DIR
@@ -51,12 +51,12 @@ udevadm trigger
 # Systemd service installation
 # ============================================================
 
-cat "./system/obscreen-studio.service" | sed "s#/home/pi#$WORKING_DIR#g" | sed "s#=pi#=$OWNER#g" | sudo tee /etc/systemd/system/obscreen-studio.service
-sudo systemctl daemon-reload
-sudo systemctl enable obscreen-studio.service
+cat "./system/obscreen-studio.service" | sed "s#/home/pi#$WORKING_DIR#g" | sed "s#=pi#=$OWNER#g" | tee /etc/systemd/system/obscreen-studio.service
+systemctl daemon-reload
+systemctl enable obscreen-studio.service
 
 # ============================================================
 # Start
 # ============================================================
 
-sudo systemctl restart obscreen-studio.service
+systemctl restart obscreen-studio.service
