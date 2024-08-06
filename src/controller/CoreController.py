@@ -32,7 +32,7 @@ class CoreController(ObController):
     # def cast_url(self):
     #     data = request.get_json()
     #     success = cast_url(friendly_name=data.get('device'), url=data.get('url'), discovery_timeout=5)
-
-        # return jsonify({
-        #     'success': success
-        # })
+    #
+    #     return jsonify({
+    #         'success': success
+    #     })
