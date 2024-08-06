@@ -13,6 +13,8 @@
 {% block add_js %}
     <script type="text/javascript">
         var route_slide_position = '{{ url_for('slideshow_slide_position') }}';
+        var route_cast_scan = '{{ url_for('cast_scan') }}';
+        var route_cast_url = '{{ url_for('cast_url') }}';
         var choices_translations = {
             'loop': '{{ l.slideshow_slide_form_label_cron_scheduled_loop }}',
             'datetime': '{{ l.slideshow_slide_form_label_cron_scheduled_datetime }}',
@@ -43,27 +45,6 @@
             }
         }
         var contents = {{ json_dumps(contents) | safe }}
-    </script>
-    <script>
-        jQuery(function($) {
-            if (typeof chrome !== 'undefined') {
-                $('.chrome-only').removeClass('hidden');
-
-                var script_sender = document.createElement('script');
-                script_sender.src = "{{ STATIC_PREFIX }}js/lib/cast-sender.js";
-                document.body.appendChild(script_sender);
-
-                if (document.location.protocol.indexOf('https') === 0) {
-                    var script_caster = document.createElement('script');
-                    script_caster.src = "{{ STATIC_PREFIX }}js/cast-url.js";
-                    document.body.appendChild(script_caster);
-                } else {
-                    $(document).on('click', '.cast-url', function() {
-                        window.open('https://cast.obscreen.io/sender.html?url=' + encodeURIComponent($('#' + $(this).attr('data-target-id')).val()));
-                    });
-                }
-            }
-        });
     </script>
     <script src="{{ STATIC_PREFIX }}js/lib/jquery-explr-1.4.js"></script>
     <script src="{{ STATIC_PREFIX }}js/lib/jquery-ui.min.js"></script>
@@ -148,7 +129,7 @@
         <div class="modals-outer">
             <div class="modals-inner">
                 {% include 'playlist/modal/add.jinja.html' %}
-                {% include 'playlist/modal/qrcode.jinja.html' %}
+                {% include 'playlist/modal/cast-scan.jinja.html' %}
 
                 {% with is_notification=True %}{% include 'slideshow/slides/modal/edit.jinja.html' %}{% endwith %}
                 {% with is_notification=False %}{% include 'slideshow/slides/modal/edit.jinja.html' %}{% endwith %}

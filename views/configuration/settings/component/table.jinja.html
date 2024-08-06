@@ -3,6 +3,7 @@
     {% set ns = namespace(last_section='') %}
     {% for variable in variables %}
         {% set section_change = variable.section and ns.last_section != variable.section %}
+        {% set highlighted = request.args.get('highlight') == variable.name %}
 
         {% if section_change %}
             {% if not loop.first %}</tbody><tbody>{% endif %}
@@ -12,7 +13,7 @@
                 </td>
             </tr>
         {% endif %}
-        <tr class="variable-item variable-edit" data-level="{{ variable.id }}" data-entity="{{ variable.to_json() }}">
+        <tr class="variable-item variable-edit {{ 'highlighted' if highlighted }}" data-level="{{ variable.id }}" data-entity="{{ variable.to_json() }}">
             <td class="description">
                 {{ t(variable.description) }}
             </td>

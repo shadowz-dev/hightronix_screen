@@ -139,6 +139,30 @@
 					}
 				}
 			}
+
+			&.highlighted:hover,
+			&.highlighted {
+				background-color: $seaBlue;
+
+				td {
+					font-weight: bold;
+					color: $gscaleF;
+
+					i.icon-legend {
+						color: $gscaleF;
+					}
+
+					span,
+					i.icon-value {
+						background-color: rgba($gscaleF, .3);
+						color: $gscaleF;
+					}
+
+					&.description {
+						color: $white;
+					}
+				}
+			}
 		}
 	}
 }

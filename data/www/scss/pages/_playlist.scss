@@ -12,21 +12,71 @@
 		color: $gscale6;
 	}
 
-	.modal-playlist-qrcode {
+	.modal-playlist-cast-scan {
 		h2 {
-			text-align: center;
+			text-align: left;
 		}
 
-		.qrcode-pic {
+		.alert {
+			padding: 10px;
+			font-size: 12px;
+			margin-bottom: 20px;
+			display: block;
 			text-align: center;
-			display: flex;
-			flex-direction: row;
-			justify-content: center;
-			align-items: center;
 
-			img {
-				border: 4px solid $gscale5;
+			i {
+				margin-right: 5px;
+			}
+
+			a {
+				margin: 0;
+			}
+		}
+
+		.loading {
+			color: $gscaleF;
+			animation-duration: 2s;
+			animation-iteration-count: infinite;
+			animation-name: blinkfade;
+		}
+
+		ul.cast-devices {
+			list-style: none;
+			margin: 0;
+			padding: 0;
+
+			li {
+				display: flex;
+				flex-direction: row;
+				justify-content: flex-start;
+				align-items: center;
+				list-style: none;
+				border-bottom: 1px solid $gscale2;
 				border-radius: $baseRadius;
+
+				a {
+					flex: 1;
+					display: flex;
+					flex-direction: row;
+					justify-content: flex-start;
+					align-items: center;
+					padding: 20px 15px;
+					color: $gscaleF;
+					align-self: stretch;
+
+					i {
+
+						margin-right: 10px;
+					}
+				}
+
+				&:hover {
+					background: $gscale2;
+				}
+			}
+
+			li:last-child {
+				border: none;
 			}
 		}
 	}
@@ -97,7 +147,7 @@
 							margin-bottom: 5px;
 						}
 					}
-					
+
 					.preview-holder {
 						position: relative;
 
@@ -114,6 +164,7 @@
 							.hover-only {
 								display: flex;
 								position: absolute;
+
 								&:hover {
 									background: $gkscaleC;
 								}
