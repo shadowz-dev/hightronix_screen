@@ -1,6 +1,7 @@
 import time
 import pychromecast
 import zeroconf
+import logging
 
 from pychromecast.discovery import stop_discovery
 from pychromecast import CastBrowser, SimpleCastListener, get_chromecast_from_host, Chromecast
@@ -44,6 +45,7 @@ def fetch_chromecast(friendly_name: str, discovery_timeout: int = 5) -> Optional
             except:
                 pass
 
+    logging.info("No chromecast found for friendly_name {}".format(friendly_name))
     return None
 
 
@@ -51,6 +53,7 @@ def cast_url(friendly_name: str, url: str, discovery_timeout: int = 5) -> bool:
     chromecast = fetch_chromecast(friendly_name, discovery_timeout)
 
     if not chromecast:
+        logging.info("Can't instantiate Chromecast {}".format(friendly_name))
         return False
 
     chromecast.wait()
