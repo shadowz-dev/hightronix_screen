@@ -46,6 +46,21 @@
         }
         var contents = {{ json_dumps(contents) | safe }}
     </script>
+    <script>
+        jQuery(function($) {
+            if (typeof chrome !== 'undefined') {
+                $('.chrome-only').removeClass('hidden');
+
+                var script_sender = document.createElement('script');
+                script_sender.src = "{{ STATIC_PREFIX }}js/lib/cast-sender.js";
+                document.body.appendChild(script_sender);
+
+                var script_caster = document.createElement('script');
+                script_caster.src = "{{ STATIC_PREFIX }}js/cast-url.js";
+                document.body.appendChild(script_caster);
+            }
+        });
+    </script>
     <script src="{{ STATIC_PREFIX }}js/lib/jquery-explr-1.4.js"></script>
     <script src="{{ STATIC_PREFIX }}js/lib/jquery-ui.min.js"></script>
     <script src="{{ STATIC_PREFIX }}js/lib/flatpickr.min.js"></script>
@@ -129,7 +144,7 @@
         <div class="modals-outer">
             <div class="modals-inner">
                 {% include 'playlist/modal/add.jinja.html' %}
-                {% include 'playlist/modal/cast-scan.jinja.html' %}
+{#                {% include 'playlist/modal/cast-scan.jinja.html' %}#}
 
                 {% with is_notification=True %}{% include 'slideshow/slides/modal/edit.jinja.html' %}{% endwith %}
                 {% with is_notification=False %}{% include 'slideshow/slides/modal/edit.jinja.html' %}{% endwith %}
