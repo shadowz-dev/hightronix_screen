@@ -1,0 +1,25 @@
+<div class="modal modal-playlist-cast-scan modal-playlist">
+    <h2>
+        Cast
+    </h2>
+
+    <div class="alert alert-warning">
+        <i class="fa fa-warning"></i>
+
+        {{ l.playlist_cast_warning|replace('%href%', url_for('settings_variable_list', highlight='external_url'))|safe }}
+    </div>
+
+    <div class="loading" data-loading="{{ l.common_loading }}" data-casting="{{ l.common_casting }}">
+        {{ l.common_loading }}
+    </div>
+
+    <ul class="cast-devices">
+
+    </ul>
+
+    <div class="actions actions-right">
+        <button type="button" class="btn btn-naked modal-close">
+            <i class="fa fa-close icon-left"></i>{{ l.common_close }}
+        </button>
+    </div>
+</div>
