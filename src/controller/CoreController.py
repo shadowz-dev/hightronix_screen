@@ -2,7 +2,7 @@ from typing import Optional
 from flask import Flask, send_file, render_template_string, jsonify, request
 
 from src.interface.ObController import ObController
-from src.util.UtilChromecast import fetch_friendly_names, cast_url
+# from src.util.UtilChromecast import fetch_friendly_names, cast_url
 
 
 class CoreController(ObController):
@@ -33,6 +33,6 @@ class CoreController(ObController):
     #     data = request.get_json()
     #     success = cast_url(friendly_name=data.get('device'), url=data.get('url'), discovery_timeout=5)
 
-        return jsonify({
-            'success': success
-        })
+        # return jsonify({
+        #     'success': success
+        # })
