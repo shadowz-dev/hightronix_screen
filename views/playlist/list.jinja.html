@@ -13,6 +13,8 @@
 {% block add_js %}
     <script type="text/javascript">
         var route_slide_position = '{{ url_for('slideshow_slide_position') }}';
+        var route_cast_scan = '{{ url_for('cast_scan') }}';
+        var route_cast_url = '{{ url_for('cast_url') }}';
         var choices_translations = {
             'loop': '{{ l.slideshow_slide_form_label_cron_scheduled_loop }}',
             'datetime': '{{ l.slideshow_slide_form_label_cron_scheduled_datetime }}',
@@ -127,7 +129,7 @@
         <div class="modals-outer">
             <div class="modals-inner">
                 {% include 'playlist/modal/add.jinja.html' %}
-                {% include 'playlist/modal/qrcode.jinja.html' %}
+                {% include 'playlist/modal/cast-scan.jinja.html' %}
 
                 {% with is_notification=True %}{% include 'slideshow/slides/modal/edit.jinja.html' %}{% endwith %}
                 {% with is_notification=False %}{% include 'slideshow/slides/modal/edit.jinja.html' %}{% endwith %}
