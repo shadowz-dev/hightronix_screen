@@ -13,7 +13,7 @@ class Slide:
         self._id = id if id else None
         self._playlist_id = playlist_id
         self._content_id = content_id
-        self._duration = duration if duration >= 0 else 0
+        self._duration = duration if isinstance(duration, int) and duration >= 0 else 0
         self._delegate_duration = delegate_duration
         self._enabled = enabled
         self._is_notification = is_notification
