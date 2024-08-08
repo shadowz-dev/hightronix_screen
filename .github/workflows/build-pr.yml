@@ -18,7 +18,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Call common build workflow
-        uses: ./.github/workflows/common-docker-build.yml
+        uses: ./.github/actions/common-docker-build
         with:
           build_tags: jierka/obscreen:pr-${{ github.event.pull_request.number }}
           manifest_tags: type=semver,pattern=pr
