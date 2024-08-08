@@ -12,7 +12,7 @@ on:
 jobs:
   add-label:
     runs-on: ubuntu-latest
-    if: github.event.pull_request.user.login == 'jr-k'
+    if: github.event.pull_request.user.login == 'jr-k' && !contains(github.event.pull_request.labels.*.name, 'build-pr')
 
     steps:
     - name: Add build-pr label
