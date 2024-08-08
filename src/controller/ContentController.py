@@ -9,7 +9,6 @@ from src.model.entity.Content import Content
 from src.model.enum.ContentType import ContentType
 from src.model.enum.FolderEntity import FolderEntity, FOLDER_ROOT_PATH
 from src.interface.ObController import ObController
-from src.service.ExternalStorageServer import ExternalStorageServer
 from src.util.utils import str_to_enum, get_optional_string
 from src.util.UtilFile import randomize_filename
 
@@ -60,7 +59,7 @@ class ContentController(ObController):
             working_folder_children=self._model_store.folder().get_children(folder=working_folder, entity=FolderEntity.CONTENT, sort='created_at', ascending=False),
             enum_content_type=ContentType,
             enum_folder_entity=FolderEntity,
-            chroot_http_external_storage=self.get_external_storage_server().get_directory(),
+            external_storage_mountpoint=self._model_store.config().map().get('external_storage_mountpoint'),
         )
 
     def slideshow_content_add(self):
@@ -119,7 +118,7 @@ class ContentController(ObController):
             working_folder_path=working_folder_path,
             working_folder=working_folder,
             enum_content_type=ContentType,
-            chroot_http_external_storage=self.get_external_storage_server().get_directory(),
+            external_storage_mountpoint=self._model_store.config().map().get('external_storage_mountpoint')
         )
 
     def slideshow_content_save(self, content_id: int = 0):
