@@ -16,7 +16,8 @@ jobs:
       - name: Read Version
         id: version
         run: echo "::set-output name=VERSION::$(cat version.txt)"
-      - uses: ./.github/workflows/common-docker-build.yml
+      - name: Call common build workflow
+        uses: ./.github/workflows/common-docker-build.yml
         with:
           build_tags: |
             jierka/obscreen:v${{ steps.version.outputs.VERSION }}
