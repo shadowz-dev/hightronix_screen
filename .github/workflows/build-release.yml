@@ -14,9 +14,11 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
+
       - name: Read Version
         id: version
         run: echo "::set-output name=VERSION::$(cat version.txt)"
+
       - name: Call common build workflow
         uses: ./.github/workflows/common-docker-build.yml
         with:
