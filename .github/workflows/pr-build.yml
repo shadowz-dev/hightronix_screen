@@ -3,12 +3,16 @@ name: PR build and push ghcr image
 on:
   pull_request:
     types: [opened, synchronize, labeled]
-  repository_dispatch:
-    types: [build-pr]
+  push:
+    branches-ignore:
+      - master
+      - develop
+      - nightly
 
 jobs:
   build-and-push:
     runs-on: ubuntu-latest
+    if: github.event.pull_request.user.login == 'jr-k' || contains(github.event.pull_request.labels.*.name, 'build-pr')
 
     steps:
     - name: Checkout code
