@@ -14,7 +14,8 @@ jobs:
     runs-on: ubuntu-latest
     if: contains(github.event.pull_request.labels.*.name, 'build-pr')
     steps:
-      - uses: actions/checkout@v2
+      - name: Checkout repository
+        uses: actions/checkout@v2
       - name: Call common build workflow
         uses: ./.github/workflows/common-docker-build.yml
         with:
