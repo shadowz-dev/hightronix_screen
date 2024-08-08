@@ -1,8 +1,13 @@
 name: Trigger build for PR
 
 on:
-  pull_request_target:
-    types: [labeled]
+  pull_request:
+    types: [opened, synchronize, labeled]
+  push:
+    branches-ignore:
+      - master
+      - develop
+      - nightly
 
 jobs:
   trigger-build:
@@ -13,6 +18,6 @@ jobs:
     - name: Trigger PR build
       uses: peter-evans/repository-dispatch@v1
       with:
-        token: ${{ secrets.GITHUB_TOKEN }}
+        token: ${{ secrets.GA_TOKEN }}
         event-type: build-pr
         client-payload: '{"pr_number": ${{ github.event.pull_request.number }}}'
