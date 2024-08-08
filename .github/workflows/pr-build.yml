@@ -2,7 +2,7 @@ name: PR build and push ghcr image
 
 on:
   pull_request:
-    types: [labeled]
+    types: [opened, synchronize, labeled]
   push:
     branches-ignore:
       - master
