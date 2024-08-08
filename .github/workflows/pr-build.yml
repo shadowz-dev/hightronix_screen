@@ -1,13 +1,15 @@
 name: Pull-Request build and push ghcr image
 
+permissions:
+  contents: read
+  packages: write
+  
 on:
-  pull_request:
-    types: [opened, synchronize, reopened]
-    branches:
-      - develop
+  repository_dispatch:
+    types: [build-pr]
 
 jobs:
-  build-and-push-pr:
+  build-and-push:
     runs-on: ubuntu-latest
 
     steps:
@@ -33,11 +35,11 @@ jobs:
         context: .
         file: ./Dockerfile
         push: true
-        tags: ghcr.io/${{ github.repository_owner }}/obscreen:pr-${{ github.event.number }}
+        tags: ghcr.io/${{ github.repository_owner }}/obscreen:pr-${{ github.event.client_payload.pr_number }}
         platforms: linux/amd64, linux/arm64/v8, linux/arm/v7
 
     - name: Create and push manifest
       uses: docker/metadata-action@v3
       with:
         images: ghcr.io/${{ github.repository_owner }}/obscreen
-        tags: pr-${{ github.event.number }}
+        tags: pr-${{ github.event.client_payload.pr_number }}
