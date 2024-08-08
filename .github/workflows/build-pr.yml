@@ -16,6 +16,10 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
+
+  common:
+    runs-on: ubuntu-latest
+    steps:
       - name: Call common build workflow
         uses: ./.github/workflows/common-docker-build.yml
         with:
