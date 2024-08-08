@@ -143,20 +143,21 @@ class PlayerController(ObController):
             slide['location'] = self._model_store.content().resolve_content_location(content)
 
             if slide['type'] == ContentType.EXTERNAL_STORAGE.value:
-                mount_point_dir = Path(self._model_store.config().map().get('external_storage_mountpoint'), slide['location'])
+                mount_point_dir = Path(self._model_store.config().map().get('external_storage_mountpoint'), content.location)
                 if mount_point_dir.is_dir():
                     for file in mount_point_dir.iterdir():
                         if file.is_file() and not file.stem.startswith('.'):
                             virtual_content = Content(
+                                id=content.id,
                                 name=file.stem,
-                                location=self._model_store.content().resolve_content_location(Path(content.location, file.name)),
+                                location=str(Path(mount_point_dir, file.name)),
                                 type=ContentType.guess_content_type_file(str(file.resolve())),
                             )
                             slide = dict(slide)
                             slide['id'] = hashlib.md5(str(file).encode('utf-8')).hexdigest()
                             slide['position'] = position
                             slide['delegate_duration'] = 1 if slide['type'] == ContentType.VIDEO.value else 0
-                            slide['name'] = virtual_content.stem
+                            slide['name'] = file.name
                             slide['type'] = virtual_content.type.value
                             slide['location'] = self._model_store.content().resolve_content_location(virtual_content)
                             self._check_slide_enablement(playlist_loop, playlist_notifications, slide)
