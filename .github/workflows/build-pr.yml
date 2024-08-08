@@ -1,8 +1,8 @@
 name: PR build and push docker image
 
 on:
-#  pull_request:
-#    types: [opened, synchronize, labeled]
+  pull_request:
+    types: [opened, synchronize, labeled]
   push:
     branches-ignore:
       - master
