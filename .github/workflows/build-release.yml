@@ -12,12 +12,12 @@ jobs:
   build-and-push-release:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Read Version
-        id: version
-        run: echo "::set-output name=VERSION::$(cat version.txt)"
+#      - name: Checkout repository
+#        uses: actions/checkout@v4
+#
+#      - name: Read Version
+#        id: version
+#        run: echo "::set-output name=VERSION::$(cat version.txt)"
 
       - name: Call common build workflow
         uses: ./.github/workflows/common-docker-build.yml
