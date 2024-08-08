@@ -1,11 +1,6 @@
 name: Trigger build for PR
 
 on:
-  push:
-    branches-ignore:
-      - 'master'
-      - 'develop'
-      - 'nightly'
   pull_request_target:
     types: [labeled]
 
