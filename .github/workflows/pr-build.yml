@@ -1,9 +1,5 @@
 name: PR build and push ghcr image
 
-permissions:
-  contents: read
-  packages: write
-
 on:
   repository_dispatch:
     types: [build-pr]
