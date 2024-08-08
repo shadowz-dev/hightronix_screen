@@ -246,7 +246,7 @@ class ContentManager(ModelManager):
                     content_type=content.type.value,
                     content_id=content.id
                 ).strip('/')
-            ).strip('/')
+            )
         elif content.type == ContentType.URL:
             location = 'http://' + content.location if not content.location.startswith('http') else content.location
 
