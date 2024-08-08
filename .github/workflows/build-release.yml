@@ -19,6 +19,9 @@ jobs:
         id: version
         run: echo "::set-output name=VERSION::$(cat version.txt)"
 
+  common:
+    runs-on: ubuntu-latest
+    steps:
       - name: Call common build workflow
         uses: ./.github/workflows/common-docker-build.yml
         with:
