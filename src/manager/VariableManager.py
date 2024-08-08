@@ -117,7 +117,6 @@ class VariableManager:
             ### General
             {"name": "lang", "section": self.t(VariableSection.GENERAL), "value": "en", "type": VariableType.SELECT_SINGLE, "editable": True, "description": self.t('settings_variable_desc_lang'), "selectables": self.t(ApplicationLanguage), "refresh_player": False},
             {"name": "external_url", "section": self.t(VariableSection.GENERAL), "value": "", "type": VariableType.STRING, "editable": False if demo else True, "description": self.t('settings_variable_desc_external_url'), "refresh_player": False},
-            {"name": "external_url_storage", "section": self.t(VariableSection.GENERAL), "value": "", "type": VariableType.STRING, "editable": False if demo else True, "description": self.t('settings_variable_desc_external_storage_url'), "refresh_player": False},
             {"name": "slide_upload_limit", "section": self.t(VariableSection.GENERAL), "value": 32, "unit": VariableUnit.MEGABYTE,  "type": VariableType.INT, "editable": False if demo else True, "description": self.t('settings_variable_desc_slide_upload_limit'), "refresh_player": False},
             {"name": "dark_mode", "section": self.t(VariableSection.GENERAL), "value": True, "type": VariableType.BOOL, "editable": True, "description": self.t('settings_variable_desc_dark_mode'), "refresh_player": False},
 
@@ -125,6 +124,7 @@ class VariableManager:
             {"name": "intro_slide_duration", "section": self.t(VariableSection.PLAYER_OPTIONS), "value": 3, "unit": VariableUnit.SECOND, "type": VariableType.INT, "editable": True, "description": self.t('settings_variable_desc_intro_slide_duration'), "refresh_player": False},
             {"name": "default_slide_time_with_seconds", "section": self.t(VariableSection.PLAYER_OPTIONS), "value": False, "type": VariableType.BOOL, "editable": True, "description": self.t('settings_variable_desc_default_slide_time_with_seconds'), "refresh_player": False},
             {"name": "polling_interval", "section": self.t(VariableSection.PLAYER_OPTIONS), "value": 5, "unit": VariableUnit.SECOND, "type": VariableType.INT, "editable": True, "description": self.t('settings_variable_desc_polling_interval'), "refresh_player": True},
+            {"name": "player_content_cache", "section": self.t(VariableSection.PLAYER_OPTIONS), "value": True, "type": VariableType.BOOL, "editable": True, "description": self.t('settings_variable_desc_player_content_cache'), "refresh_player": False},
 
             ### Player Animation
             {"name": "slide_animation_enabled", "section": self.t(VariableSection.PLAYER_ANIMATION), "value": False, "type": VariableType.BOOL, "editable": True, "description": self.t('settings_variable_desc_slide_animation_enabled'), "refresh_player": True},

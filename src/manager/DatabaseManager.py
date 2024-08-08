@@ -214,6 +214,7 @@ class DatabaseManager:
             "DELETE FROM settings WHERE name = 'playlist_default_time_sync'",
             "DELETE FROM settings WHERE name = 'slide_animation_exit_effect'",
             "DELETE FROM settings WHERE name = 'playlist_enabled'",
+            "DELETE FROM settings WHERE name = 'external_url_storage'",
             "UPDATE fleet_player_group SET slug = id WHERE slug = '' or slug is null",
             "UPDATE content SET uuid = id WHERE uuid = '' or uuid is null",
             "UPDATE slide SET uuid = id WHERE uuid = '' or uuid is null",

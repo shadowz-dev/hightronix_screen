@@ -78,7 +78,7 @@
                                 </label>
                                 <div class="widget vertical">
                                     {% if content.type == enum_content_type.EXTERNAL_STORAGE %}
-                                        <input type="text" class="disabled" disabled value="{{ chroot_http_external_storage }}/" />
+                                        <input type="text" class="disabled" disabled value="{{ external_storage_mountpoint }}/" />
                                     {% endif %}
                                 
                                     {% set location = content.location %}

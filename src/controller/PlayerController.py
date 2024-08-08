@@ -1,18 +1,20 @@
+import os
 import json
 import logging
 import hashlib
 
-from datetime import datetime
+from datetime import datetime, timedelta
 from typing import Optional, List, Dict
-from flask import Flask, render_template, redirect, request, url_for, send_from_directory, jsonify, abort
+from flask import Flask, render_template, redirect, request, url_for, send_from_directory, jsonify, abort, send_file, Response
 from pathlib import Path
 
 from src.model.entity.Slide import Slide
+from src.model.entity.Content import Content
 from src.model.enum.ContentType import ContentType
 from src.exceptions.NoFallbackPlaylistException import NoFallbackPlaylistException
 from src.service.ModelStore import ModelStore
 from src.interface.ObController import ObController
-from src.util.utils import get_safe_cron_descriptor, is_cron_in_datetime_moment, is_cron_in_week_moment, is_now_after_cron_date_time_moment, is_now_after_cron_week_moment
+from src.util.utils import get_safe_cron_descriptor, is_cron_in_datetime_moment, is_cron_in_week_moment, is_now_after_cron_date_time_moment, is_now_after_cron_week_moment, decode_uri_component
 from src.util.UtilNetwork import get_safe_remote_addr, get_network_interfaces
 from src.model.enum.AnimationSpeed import animation_speed_duration
 
@@ -25,6 +27,7 @@ class PlayerController(ObController):
         self._app.add_url_rule('/player/default', 'player_default', self.player_default, methods=['GET'])
         self._app.add_url_rule('/player/playlist', 'player_playlist', self.player_playlist, methods=['GET'])
         self._app.add_url_rule('/player/playlist/use/<playlist_slug_or_id>', 'player_playlist_use', self.player_playlist, methods=['GET'])
+        self._app.add_url_rule('/serve/content/<content_type>/<content_id>/<content_location>', 'serve_content_file', self.serve_content_file, methods=['GET'])
 
     def player(self, playlist_slug_or_id: str = ''):
         preview_content_id = request.args.get('preview_content_id')
@@ -136,24 +139,26 @@ class PlayerController(ObController):
 
             content = contents[int(slide['content_id'])]
             slide['name'] = content.name
-            slide['location'] = content.location
             slide['type'] = content.type.value
+            slide['location'] = self._model_store.content().resolve_content_location(content)
 
             if slide['type'] == ContentType.EXTERNAL_STORAGE.value:
-                mount_point_dir = Path(self.get_external_storage_server().get_directory(), slide['location'])
+                mount_point_dir = Path(self._model_store.config().map().get('external_storage_mountpoint'), slide['location'])
                 if mount_point_dir.is_dir():
                     for file in mount_point_dir.iterdir():
                         if file.is_file() and not file.stem.startswith('.'):
+                            virtual_content = Content(
+                                name=file.stem,
+                                location=self._model_store.content().resolve_content_location(Path(content.location, file.name)),
+                                type=ContentType.guess_content_type_file(str(file.resolve())),
+                            )
                             slide = dict(slide)
                             slide['id'] = hashlib.md5(str(file).encode('utf-8')).hexdigest()
                             slide['position'] = position
-                            slide['type'] = ContentType.guess_content_type_file(str(file.resolve())).value
-                            slide['name'] = file.stem
                             slide['delegate_duration'] = 1 if slide['type'] == ContentType.VIDEO.value else 0
-                            slide['location'] = "{}/{}".format(
-                                self._model_store.content().resolve_content_location(content),
-                                file.name
-                            )
+                            slide['name'] = virtual_content.stem
+                            slide['type'] = virtual_content.type.value
+                            slide['location'] = self._model_store.content().resolve_content_location(virtual_content)
                             self._check_slide_enablement(playlist_loop, playlist_notifications, slide)
                             position = position + 1
             else:
@@ -197,3 +202,39 @@ class PlayerController(ObController):
                 return
 
         loop.append(slide)
+
+    def serve_content_file(self, content_location, content_type, content_id):
+        content = self._model_store.content().get(content_id)
+
+        if not content:
+            abort(404, 'Content not found')
+
+        content_location = decode_uri_component(content_location)
+
+        content_path = str(Path(self.get_application_dir(), content_location))
+
+        if content_type == ContentType.EXTERNAL_STORAGE.value:
+            content_path = str(Path(self._model_store.config().map().get('external_storage_mountpoint'), content_location))
+
+        if not os.path.exists(content_path) or '..' in content_path:
+            abort(404, 'Content not found')
+
+        if not self._model_store.variable().get_one_by_name('player_content_cache').as_bool():
+            response = send_file(content_path)
+            response.headers['Cache-Control'] = 'no-store, no-cache, must-revalidate, max-age=0'
+            response.headers['Pragma'] = 'no-cache'
+            response.headers['Expires'] = '0'
+            return response
+
+        content_path_hash = hashlib.sha256(str(content_path).encode()).hexdigest()
+        etag = f'"{content_path_hash}-{content_id}-{os.path.getmtime(content_path)}"'
+
+        if_none_match = request.headers.get('If-None-Match')
+        if if_none_match == etag:
+            return Response(status=304)
+
+        response = send_file(content_path)
+        response.headers['Cache-Control'] = 'public, max-age=3153600000'  # 100 years
+        response.headers['ETag'] = etag
+
+        return response

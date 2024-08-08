@@ -6,7 +6,7 @@ import inspect
 import subprocess
 import unicodedata
 import platform
-
+import urllib.parse
 
 from datetime import datetime, timedelta
 from typing import Optional, List, Dict
@@ -335,3 +335,11 @@ def str_to_bool(value):
         return True
     else:
         raise ValueError('Boolean value expected.')
+
+
+def encode_uri_component(uri_component):
+    return urllib.parse.quote(uri_component, safe='~()*!.\'')
+
+
+def decode_uri_component(encoded_component):
+    return urllib.parse.unquote(encoded_component)
