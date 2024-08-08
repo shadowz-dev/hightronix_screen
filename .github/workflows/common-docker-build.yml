@@ -1,23 +1,12 @@
-name: Build and Push Docker images
+name: Common Docker Build
 
-on:
-  push:
-    branches:
-      - master
-    paths:
-      - 'version.txt'
-  workflow_dispatch:
-
+on: [push]
 
 jobs:
   build-and-push:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
-
-    - name: Read Version
-      id: version
-      run: echo "::set-output name=VERSION::$(cat version.txt)"
 
     - name: Set up QEMU
       uses: docker/setup-qemu-action@v1
@@ -37,15 +26,12 @@ jobs:
         context: .
         file: ./Dockerfile
         push: true
-        tags: |
-          jierka/obscreen:v${{ steps.version.outputs.VERSION }}
-          jierka/obscreen:latest
+        tags: ${{ inputs.build_tags }}
         platforms: linux/amd64, linux/arm64/v8, linux/arm/v7
 
     - name: Create and push manifest
       uses: docker/metadata-action@v3
       with:
         images: jierka/obscreen
-        tags: type=semver,pattern=v{{version}}
-        flavor: |
-          latest=true
+        tags: ${{ inputs.manifest_tags }}
+        flavor: ${{ inputs.flavor }}

@@ -1,0 +1,19 @@
+name: Release build and push docker images
+
+on:
+  push:
+    branches:
+      - master
+    paths:
+      - 'version.txt'
+  workflow_dispatch:
+
+jobs:
+  build-and-push:
+    uses: ./.github/workflows/common-docker-build.yml
+    with:
+      build_tags: |
+        jierka/obscreen:v${{ github.run_number }}
+        jierka/obscreen:latest
+      manifest_tags: type=semver,pattern=v${{ github.run_number }}
+      flavor: latest=true
