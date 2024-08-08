@@ -1,6 +1,6 @@
 name: Common Docker Build
 
-on: [push]
+on: [workflow_call]
 
 jobs:
   build-and-push:
