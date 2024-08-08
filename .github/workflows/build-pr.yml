@@ -1,0 +1,20 @@
+name: PR build and push ghcr image
+
+on:
+  pull_request:
+    types: [opened, synchronize, labeled]
+  push:
+    branches-ignore:
+      - master
+      - develop
+      - nightly
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    if: contains(github.event.pull_request.labels.*.name, 'build-pr')
+    uses: ./.github/workflows/common-docker-build.yml
+    with:
+      build_tags: jierka/obscreen:pr-${{ github.event.client_payload.pr_number }}
+      manifest_tags: type=semver,pattern=pr
+      flavor: ""

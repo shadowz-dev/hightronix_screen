@@ -1,0 +1,25 @@
+name: Release build and push docker image
+
+on:
+  push:
+    branches:
+      - master
+    paths:
+      - 'version.txt'
+  workflow_dispatch:
+
+jobs:
+  build-and-push-release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Read Version
+        id: version
+        run: echo "::set-output name=VERSION::$(cat version.txt)"
+      - uses: ./.github/workflows/common-docker-build.yml
+        with:
+          build_tags: |
+            jierka/obscreen:v${{ steps.version.outputs.VERSION }}
+            jierka/obscreen:latest
+          manifest_tags: type=semver,pattern=v${{ steps.version.outputs.VERSION }}
+          flavor: latest=true
