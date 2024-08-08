@@ -1,0 +1,41 @@
+name: Nightly build synced with develop and push docker image
+
+on:
+  schedule:
+    - cron: '0 0 * * *'
+  workflow_dispatch:
+
+jobs:
+  build-and-push-nightly:
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/develop'
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+        with:
+          ref: develop
+
+      - name: Set up Git
+        run: |
+          git config --global user.name 'github-actions'
+          git config --global user.email 'github-actions@github.com'
+
+      - name: Sync nightly branch
+        run: |
+          git checkout nightly
+          git merge develop --no-edit
+          git push origin nightly --force
+
+      - name: Checkout nightly branch
+        uses: actions/checkout@v2
+        with:
+          ref: nightly
+
+      - name: Call common build workflow
+        uses: ./.github/actions/common-docker-build
+        with:
+          build_tags: jierka/obscreen:nightly
+          manifest_tags: type=semver,pattern=nightly
+          flavor: ""
+          docker_username: ${{ secrets.DOCKER_USERNAME }}
+          docker_password: ${{ secrets.DOCKER_PASSWORD }}

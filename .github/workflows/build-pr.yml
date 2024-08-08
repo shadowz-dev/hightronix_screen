@@ -1,0 +1,28 @@
+name: PR build and push docker image
+
+on:
+  pull_request:
+    types: [opened, synchronize, labeled]
+  push:
+    branches-ignore:
+      - master
+      - develop
+      - nightly
+  workflow_dispatch:
+
+jobs:
+  build-and-push-pr:
+    runs-on: ubuntu-latest
+    if: contains(github.event.pull_request.labels.*.name, 'build-pr')
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Call common build workflow
+        uses: ./.github/actions/common-docker-build
+        with:
+          build_tags: jierka/obscreen:pr-${{ github.event.pull_request.number }}
+          manifest_tags: type=semver,pattern=pr
+          flavor: ""
+          docker_username: ${{ secrets.DOCKER_USERNAME }}
+          docker_password: ${{ secrets.DOCKER_PASSWORD }}
