@@ -1,4 +1,4 @@
-name: Nightly synced with develop, build and push docker images
+name: Nightly build synced with develop and push docker images
 
 on:
   schedule:
