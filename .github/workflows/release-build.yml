@@ -9,7 +9,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  build-and-push:
+  build-and-push-release:
     uses: ./.github/workflows/common-docker-build.yml
     with:
       build_tags: |

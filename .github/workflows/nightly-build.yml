@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  sync-and-build:
+  build-and-push-nightly:
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/develop'
     steps:
