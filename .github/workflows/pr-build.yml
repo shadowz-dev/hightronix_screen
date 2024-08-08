@@ -1,4 +1,4 @@
-name: Pull-Request build and push ghcr image
+name: PR build and push ghcr image
 
 permissions:
   contents: read

@@ -1,4 +1,4 @@
-name: Add build label to start trigger build for PR
+name: PR trigger if admin
 
 on:
   pull_request:
