@@ -1,0 +1,22 @@
+name: Add build label to start trigger build for PR
+
+on:
+  push:
+    branches-ignore:
+      - 'master'
+      - 'develop'
+      - 'nightly'
+  pull_request_target:
+    types: [opened]
+
+jobs:
+  add-label:
+    runs-on: ubuntu-latest
+    if: github.event.pull_request.user.login == 'jr-k'
+
+    steps:
+    - name: Add build-pr label
+      uses: actions-ecosystem/action-add-labels@v1
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        labels: build-pr

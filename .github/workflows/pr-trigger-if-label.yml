@@ -1,0 +1,23 @@
+name: Trigger build for PR
+
+on:
+  push:
+    branches-ignore:
+      - 'master'
+      - 'develop'
+      - 'nightly'
+  pull_request_target:
+    types: [labeled]
+
+jobs:
+  trigger-build:
+    runs-on: ubuntu-latest
+    if: contains(github.event.pull_request.labels.*.name, 'build-pr')
+
+    steps:
+    - name: Trigger PR build
+      uses: peter-evans/repository-dispatch@v1
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+        event-type: build-pr
+        client-payload: '{"pr_number": ${{ github.event.pull_request.number }}}'
