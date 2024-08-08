@@ -1,6 +1,8 @@
 name: Add build label to start trigger build for PR
 
 on:
+  pull_request:
+    types: [opened, synchronize]
   push:
     branches-ignore:
       - 'master'
