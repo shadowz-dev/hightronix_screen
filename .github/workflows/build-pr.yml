@@ -23,3 +23,5 @@ jobs:
           build_tags: jierka/obscreen:pr-${{ github.event.pull_request.number }}
           manifest_tags: type=semver,pattern=pr
           flavor: ""
+          docker_username: ${{ secrets.DOCKER_USERNAME }}
+          docker_password: ${{ secrets.DOCKER_PASSWORD }}
