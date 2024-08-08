@@ -19,3 +19,4 @@ jobs:
       uses: actions-ecosystem/action-add-labels@v1
       with:
         labels: build-pr
+        github_token: ${{ secrets.GA_TOKEN }}
