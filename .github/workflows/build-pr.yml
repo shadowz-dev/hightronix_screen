@@ -8,6 +8,7 @@ on:
       - master
       - develop
       - nightly
+  workflow_dispatch:
 
 jobs:
   build-and-push-pr:

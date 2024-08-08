@@ -27,3 +27,5 @@ jobs:
             jierka/obscreen:latest
           manifest_tags: type=semver,pattern=v${{ steps.version.outputs.VERSION }}
           flavor: latest=true
+          docker_username: ${{ secrets.DOCKER_USERNAME }}
+          docker_password: ${{ secrets.DOCKER_PASSWORD }}

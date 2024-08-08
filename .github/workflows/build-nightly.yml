@@ -32,8 +32,10 @@ jobs:
           ref: nightly
 
       - name: Call common build workflow
-        uses: ./.github/workflows/common-docker-build.yml
+        uses: ./.github/actions/common-docker-build
         with:
           build_tags: jierka/obscreen:nightly
           manifest_tags: type=semver,pattern=nightly
           flavor: ""
+          docker_username: ${{ secrets.DOCKER_USERNAME }}
+          docker_password: ${{ secrets.DOCKER_PASSWORD }}
