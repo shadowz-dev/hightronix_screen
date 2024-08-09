@@ -10,6 +10,11 @@ Obscreen is a user-friendly self-hosted digital signage tool leveraging chromium
 
 <img src="https://github.com/jr-k/obscreen/blob/master/docs/screenshot-playlist-edit.png" width="700" alt="" />
 
+🧑‍🎄 Open to feature request and pull request. [Cast your vote for your preferred ones on the Canny platform](https://obscreen.canny.io/)
+
+⭐️ You liked it ? Give this repository a star, it's free :)
+
+---
 
 ## 🕹️ Live Demo
 
@@ -19,7 +24,7 @@ Demo Server (Location: Roubaix - France): [https://demo.obscreen.io](https://dem
 
 It is a temporary live demo, all data will be deleted after 30 minutes (~30secs downtime).
 
-## ⭐️ Features
+## 🎉 Features
 - Dead simple chromium webview inside
 - Fancy graphical user interface
 - Very few dependencies
