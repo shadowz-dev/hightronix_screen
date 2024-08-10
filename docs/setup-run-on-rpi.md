@@ -104,7 +104,7 @@ sudo reboot
 1. Just use systemctl `sudo systemctl restart obscreen-player.service`
 
 #### How to enable sound
-1. First you have to reboot your device with `sudo reboot`
+1. First you have to reboot your device if you never did after obscreen player installation; with command `sudo reboot`
 2. You have to set audio channel to HDMI `sudo raspi-config nonint do_audio 1` (0 is for jack 3.5 output)
 
 ---
