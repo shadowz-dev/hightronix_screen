@@ -156,7 +156,7 @@ class PlayerController(ObController):
                             slide = dict(slide)
                             slide['id'] = hashlib.md5(str(file).encode('utf-8')).hexdigest()
                             slide['position'] = position
-                            slide['delegate_duration'] = 1 if slide['type'] == ContentType.VIDEO.value else 0
+                            slide['delegate_duration'] = 1 if virtual_content.type == ContentType.VIDEO else 0
                             slide['name'] = file.name
                             slide['type'] = virtual_content.type.value
                             slide['location'] = self._model_store.content().resolve_content_location(virtual_content)
