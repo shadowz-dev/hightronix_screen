@@ -25,7 +25,6 @@ apt-get install -y git python3-pip python3-venv libsqlite3-dev ntfs-3g ffmpeg
 cd $WORKING_DIR
 git clone https://github.com/jr-k/obscreen.git
 cd obscreen
-chown -R $OWNER:$OWNER ./
 
 # Install application dependencies
 python3 -m venv venv
@@ -37,6 +36,9 @@ cp .env.dist .env
 
 # Add user to needed group
 usermod -aG plugdev $OWNER
+
+# Fix permissions
+chown -R $OWNER:$OWNER ./
 
 # ============================================================
 # Automount script for external storage
