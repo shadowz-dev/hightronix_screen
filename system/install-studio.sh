@@ -25,7 +25,7 @@ apt-get install -y git python3-pip python3-venv libsqlite3-dev ntfs-3g ffmpeg
 cd $WORKING_DIR
 git clone https://github.com/jr-k/obscreen.git
 cd obscreen
-chown -R $USER:$USER ./
+chown -R $OWNER:$OWNER ./
 
 # Install application dependencies
 python3 -m venv venv
