@@ -10,9 +10,9 @@ def mp4_duration_with_ffprobe(filename):
     fields = json.loads(result)['streams'][0]
 
     if 'tags' in fields and 'DURATION' in fields['tags']:
-        return int(float(fields['tags']['DURATION']))
+        return round(float(fields['tags']['DURATION']), 2)
 
     if 'duration' in fields:
-        return int(float(fields['duration']))
+        return round(float(fields['duration']), 2)
 
     return 0

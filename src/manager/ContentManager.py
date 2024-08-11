@@ -28,7 +28,7 @@ class ContentManager(ModelManager):
         "name CHAR(255)",
         "type CHAR(30)",
         "location TEXT",
-        "duration INTEGER",
+        "duration FLOAT",
         "folder_id INTEGER",
         "created_by CHAR(255)",
         "updated_by CHAR(255)",
