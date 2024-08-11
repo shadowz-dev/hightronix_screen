@@ -3,6 +3,7 @@ import os
 from typing import Dict, Optional, List, Tuple, Union
 
 from src.model.entity.Playlist import Playlist
+from src.model.enum.ContentType import ContentType
 from src.util.utils import get_optional_string, get_yt_video_id, slugify, slugify_next
 from src.manager.DatabaseManager import DatabaseManager
 from src.manager.SlideManager import SlideManager
@@ -69,15 +70,17 @@ class PlaylistManager(ModelManager):
         durations = self._db.execute_read_query("""
 SELECT
     playlist_id,
-    SUM(CASE
+    ROUND(SUM(CASE
         WHEN s.delegate_duration = 1 THEN c.duration
+        WHEN c.type = '{}' THEN s.duration
         ELSE s.duration
-    END) AS total_duration
+    END)) AS total_duration
 FROM {} s
 LEFT JOIN {} c ON c.id = s.content_id
-WHERE cron_schedule IS NULL {}
+WHERE cron_schedule IS NULL {} AND s.enabled is TRUE
 GROUP BY playlist_id;
 """.format(
+            ContentType.EXTERNAL_STORAGE.value,
             SlideManager.TABLE_NAME,
             ContentManager.TABLE_NAME,
             "{}".format(
