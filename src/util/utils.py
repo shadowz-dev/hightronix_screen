@@ -251,7 +251,7 @@ def slugify(value):
 
 
 def seconds_to_hhmmss(seconds):
-    seconds = int(seconds)
+    seconds = int(seconds) if seconds else 0
     if not seconds:
         return ""
     hours = seconds // 3600
