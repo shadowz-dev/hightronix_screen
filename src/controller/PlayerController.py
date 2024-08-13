@@ -33,9 +33,10 @@ class PlayerController(ObController):
         preview_content_id = request.args.get('preview_content_id')
         playlist_slug_or_id = self._get_dynamic_playlist_id(playlist_slug_or_id)
 
-        current_playlist = self._model_store.playlist().get_one_by("slug = ? OR id = ?", {
+        current_playlist = self._model_store.playlist().get_one_by("(slug = ? OR id = ?) AND enabled = ?", {
             "slug": playlist_slug_or_id,
-            "id": playlist_slug_or_id
+            "id": playlist_slug_or_id,
+            "enabled": True
         })
 
         if playlist_slug_or_id and not current_playlist:
