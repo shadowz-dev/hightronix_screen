@@ -84,6 +84,7 @@
         <div class="preview-holder">
             {% set base_url = external_url if external_url else request.scheme ~ '://' ~ request.headers.get('host') %}
             {% set preview_url = base_url ~ url_for('player_use', playlist_slug_or_id=current_playlist.slug) %}
+            {% set preview_url_iframe = base_url ~ url_for('player_use', playlist_slug_or_id=current_playlist.slug, preview_playlist=1, intro=0, animation=0) %}
 
             <h4 class="divide">
                 URL
@@ -123,7 +124,7 @@
             <div class="preview">
                 <button type="button" class="btn btn-pixel playlist-preview"
                         title="{{ l.playlist_panel_preview_action }}"
-                        data-url="{{ preview_url }}?intro=0&animation=0">
+                        data-url="{{ preview_url_iframe }}">
                     <i class="fa fa-play"></i>
                 </button>
             </div>

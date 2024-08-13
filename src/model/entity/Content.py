@@ -9,7 +9,7 @@ from src.util.utils import str_to_enum
 
 class Content:
 
-    def __init__(self, uuid: str = '', location: str = '', type: Union[ContentType, str] = ContentType.URL, name: str = 'Untitled', id: Optional[int] = None, duration: Optional[int] = None, created_by: Optional[str] = None, updated_by: Optional[str] = None, created_at: Optional[int] = None, updated_at: Optional[int] = None, folder_id: Optional[int] = None):
+    def __init__(self, uuid: str = '', location: str = '', type: Union[ContentType, str] = ContentType.URL, name: str = 'Untitled', id: Optional[int] = None, duration: Optional[float] = None, created_by: Optional[str] = None, updated_by: Optional[str] = None, created_at: Optional[int] = None, updated_at: Optional[int] = None, folder_id: Optional[int] = None):
         self._uuid = uuid if uuid else self.generate_and_set_uuid()
         self._id = id if id else None
         self._location = location
@@ -88,11 +88,11 @@ class Content:
         self._folder_id = value
 
     @property
-    def duration(self) -> Optional[int]:
+    def duration(self) -> Optional[float]:
         return self._duration
 
     @duration.setter
-    def duration(self, value: Optional[int]):
+    def duration(self, value: Optional[float]):
         self._duration = value
 
     @property
