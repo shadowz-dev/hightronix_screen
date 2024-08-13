@@ -30,14 +30,21 @@ class PlayerController(ObController):
         self._app.add_url_rule('/serve/content/<content_type>/<content_id>/<content_location>', 'serve_content_file', self.serve_content_file, methods=['GET'])
 
     def player(self, playlist_slug_or_id: str = ''):
+        preview_playlist = request.args.get('preview_playlist')
         preview_content_id = request.args.get('preview_content_id')
         playlist_slug_or_id = self._get_dynamic_playlist_id(playlist_slug_or_id)
 
-        current_playlist = self._model_store.playlist().get_one_by("(slug = ? OR id = ?) AND enabled = ?", {
+        query = " (slug = ? OR id = ?) "
+        query_args = {
             "slug": playlist_slug_or_id,
             "id": playlist_slug_or_id,
-            "enabled": True
-        })
+        }
+
+        if not preview_playlist:
+            query = query + " AND enabled = ? "
+            query_args["enabled"] = True
+
+        current_playlist = self._model_store.playlist().get_one_by(query, query_args)
 
         if playlist_slug_or_id and not current_playlist:
             return abort(404)
