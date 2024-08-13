@@ -142,7 +142,9 @@ GROUP BY playlist_id;
         return playlist
 
     def pre_update(self, playlist: Dict) -> Dict:
-        playlist = self.slugify(playlist)
+        if 'slug' in playlist:
+            playlist = self.slugify(playlist)
+
         self.user_manager.track_user_on_update(playlist)
         return playlist
 
@@ -172,6 +174,9 @@ GROUP BY playlist_id;
             "time_sync": time_sync if isinstance(time_sync, bool) else playlist.time_sync,
             "enabled": enabled if isinstance(enabled, bool) else playlist.enabled,
         }
+
+        if name != playlist.name:
+            form["slug"] = True
 
         self._db.update_by_id(self.TABLE_NAME, id, self.pre_update(form))
 
