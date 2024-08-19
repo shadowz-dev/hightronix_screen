@@ -28,12 +28,12 @@ done
 if [ "$disable_interaction" = false ]; then
     if [ -t 0 ]; then
         echo ""
-        read -p "Enter Obscreen studio instance URL [default value: ${default_studio_url}]: " user_url
+        read -p "Enter Hightronix Screen studio instance URL [default value: ${default_studio_url}]: " user_url
         obscreen_studio_url=${user_url:-$default_studio_url}
-        read -p "Do you confirm ${obscreen_studio_url} is a valid Obscreen studio instance? [Y/n]: " confirm
+        read -p "Do you confirm ${obscreen_studio_url} is a valid Hightronix Screen studio instance? [Y/n]: " confirm
         if [[ $confirm == "Y" || $confirm == "y" ]]; then
             echo ""
-            echo "Using Obscreen studio instance URL: $obscreen_studio_url"
+            echo "Using Hightronix Screen studio instance URL: $obscreen_studio_url"
         else
             echo "Confirmation not received. Please run the script again and enter a valid URL."
             exit 1
@@ -45,7 +45,7 @@ if [ "$disable_interaction" = false ]; then
 else
     # If --disable-interaction is passed, use the default URL without prompting
     echo ""
-    echo "Using Obscreen studio instance URL: $default_studio_url"
+    echo "Using Hightronix Screen studio instance URL: $default_studio_url"
 fi
 
 # ============================================================

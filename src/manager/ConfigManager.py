@@ -9,7 +9,7 @@ load_dotenv()
 
 class ConfigManager:
 
-    APPLICATION_NAME = "Obscreen"
+    APPLICATION_NAME = "Hightronix Screen"
     DEFAULT_PORT = 5000
     VERSION_FILE = 'version.txt'
 
@@ -44,7 +44,7 @@ class ConfigManager:
         return self._CONFIG
 
     def parse_arguments(self):
-        parser = argparse.ArgumentParser(description="Obscreen")
+        parser = argparse.ArgumentParser(description="Hightronix Screen")
         parser.add_argument('--debug', '-d', default=self._CONFIG['debug'], help='Debug mode')
         parser.add_argument('--port', '-p', default=self._CONFIG['port'], help='Application port')
         parser.add_argument('--bind', '-b', default=self._CONFIG['bind'], help='Application bind address')
@@ -52,7 +52,7 @@ class ConfigManager:
         parser.add_argument('--log-file', '-lf', default=self._CONFIG['log_file'], help='Log File path')
         parser.add_argument('--log-level', '-ll', default=self._CONFIG['log_level'], help='Log Level')
         parser.add_argument('--log-stdout', '-ls', default=self._CONFIG['log_stdout'], action='store_true', help='Log to standard output')
-        parser.add_argument('--demo', '-o', default=self._CONFIG['demo'], help='Demo mode to showcase obscreen in a sandbox')
+        parser.add_argument('--demo', '-o', default=self._CONFIG['demo'], help='Demo mode to showcase Hightronix Screen in a sandbox')
         parser.add_argument('--external-storage-mountpoint', '-e', default=self._CONFIG['external_storage_mountpoint'], help='Mountpoint directory of external storage')
         parser.add_argument('--version', '-v', default=None, action='store_true', help='Get version number')
 
@@ -80,7 +80,7 @@ class ConfigManager:
         if args.log_stdout:
             self._CONFIG['log_stdout'] = args.log_stdout
         if args.version:
-            print("{} version v{} (https://github.com/jr-k/obscreen)".format(self.APPLICATION_NAME, self._CONFIG['version']))
+            print("{} version v{} ()".format(self.APPLICATION_NAME, self._CONFIG['version']))
             sys.exit(0)
 
     def load_from_env(self) -> None:

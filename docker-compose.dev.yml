@@ -3,12 +3,12 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: obscreen
+    container_name: Hightronix Screen
     restart: unless-stopped
     environment:
       - DEMO=false
       - DEBUG=false
-      - SECRET_KEY=ANY_SECRET_KEY_HERE
+      - SECRET_KEY=a5s6df4a615dgs4596rsd1af66sfd4
       - PORT=5000
     volumes:
       - /etc/localtime:/etc/localtime:ro

@@ -234,7 +234,7 @@
   "basic_month_12": "Dicembre",
   "common_bad_directory_path": "La directory non esiste nel percorso specificato",
   "common_bad_file_type": "Tipo di file caricato non valido",
-  "common_restart_needed": "Riavvia obscreen studio (o riavvia il dispositivo) affinché le modifiche abbiano effetto",
+  "common_restart_needed": "Riavvia Hightronix Screen studio (o riavvia il dispositivo) affinché le modifiche abbiano effetto",
   "common_pick_element": "Scegli un elemento",
   "common_untitled": "<senza-titolo>",
   "common_loading": "Caricamento...",

@@ -48,7 +48,7 @@ class Application:
 
     @staticmethod
     def get_name() -> str:
-        return 'obscreen-studio'
+        return 'Hightronix Screen-studio'
 
     @staticmethod
     def get_version() -> str:

@@ -233,7 +233,7 @@
   "basic_month_12": "December",
   "common_bad_directory_path": "Directory does not exist in the specified path",
   "common_bad_file_type": "Bad file type uploaded",
-  "common_restart_needed": "Please restart obscreen studio (or restart the device) for the changes to take effect",
+  "common_restart_needed": "Please restart Hightronix Screen studio (or restart the device) for the changes to take effect",
   "common_pick_element": "Pick an element",
   "common_untitled": "<untitled>",
   "common_loading": "Loading...",

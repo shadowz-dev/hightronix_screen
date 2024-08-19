@@ -10,7 +10,7 @@ from typing import Optional, Dict
 
 class DatabaseManager:
 
-    DB_FILE: str = "data/db/obscreen.db"
+    DB_FILE: str = "data/db/Hightronix.db"
 
     def __init__(self):
         self._conn = None

@@ -293,7 +293,7 @@ def restart(debug=False) -> None:
         os.execl(python, python, *sys.argv)
     else:
         try:
-            subprocess.run(["sudo", "systemctl", "restart", 'obscreen-studio'], check=True, timeout=10, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            subprocess.run(["sudo", "systemctl", "restart", 'Hightronix Screen-studio'], check=True, timeout=10, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
             pass
         except subprocess.TimeoutExpired:
             pass
