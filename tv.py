@@ -84,7 +84,7 @@ def wake_on_lan_and_connect(tvs, url=None, credentials_file='tv_credentials.json
 if __name__ == "__main__":
     # Set up argument parsing
     parser = argparse.ArgumentParser(description='Discover, wake, and control LG webOS TVs on your network.')
-    parser.add_argument('url', type=str, help='The URL to open in the web browser on the TV.')
+    parser.add_argument('--url', type=str, help='The URL to open in the web browser on the TV (optional).')
     parser.add_argument('--credentials_file', type=str, default='tv_credentials.json', help='File to store TV credentials.')
     parser.add_argument('--tvs_file', type=str, default='connected_tvs.json', help='File to store the list of connected TVs.')
 
@@ -97,7 +97,7 @@ if __name__ == "__main__":
         for tv in tvs:
             print(f"- {tv['name']} (IP: {tv['ip']}, MAC: {tv['mac']})")
         
-        # Wake on LAN, connect to discovered TVs, and open the browser with the URL
+        # Wake on LAN, connect to discovered TVs, and optionally open the browser with the URL
         wake_on_lan_and_connect(tvs, url=args.url, credentials_file=args.credentials_file, tvs_file=args.tvs_file)
     else:
         print("No LG webOS TVs found on the network.")
