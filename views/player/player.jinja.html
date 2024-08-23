@@ -482,6 +482,13 @@
         play();
     };
 
+    const keepAlive = function() {
+        const iframe = document.getElementById('keep-alive-frame');
+        iframe.src = iframe.src;
+    };
+    // setup keep-alive to run every 2 minutes
+    setInterval(keepAlive, 2 * 60 * 1000);
+
     main();
 </script>
 </body>
