@@ -6,7 +6,11 @@ from src.service.ModelStore import ModelStore
 from src.model.entity.User import User
 from src.interface.ObController import ObController
 from typing import Optional
+import logging 
+from datetime import datetime
 
+logging.basicConfig(filename='user_activity.log', level=logging.INFO,
+                    format='%(asctime)s - %(levelname)s - %(message)s')
 class AuthController(ObController):
 
     def guard_auth(self, f):
@@ -39,11 +43,14 @@ class AuthController(ObController):
             if user:
                 if user.password == self._model_store.user().encode_password(request.form['password']):
                     login_user(user)
+                    logging.info(f"User {user.username} logged in successfully.")
                     return redirect(url_for('playlist'))
                 else:
                     login_error = 'bad_credentials'
+                    logging.warning(f"Failed login attempt for user {request.form['username']} - Incorrect password.")
             else:
                 login_error = 'not_found'
+                logging.warning(f"Failed login attempt - User {request.form['username']} not found.")
 
         return render_template(
             'auth/login.jinja.html',
@@ -73,33 +80,40 @@ class AuthController(ObController):
         )
 
     def auth_user_add(self):
-        self._model_store.user().add_form(User(
+        user = User(
             username=request.form['username'],
             password=request.form['password'],
             enabled=True if 'enabled' in request.form and request.form['enabled'] == '1' else False,
-        ))
+        )
+        self._model_store.user().add_form(user)
+        logging.info(f"User {user.username} added.")
         return redirect(url_for('auth_user_list'))
 
     def auth_user_edit(self):
-        self._model_store.user().update_form(
-            id=request.form['id'],
-            enabled=True if 'enabled' in request.form and request.form['enabled'] == '1' else False,
-            username=request.form['username'],
-            password=request.form['password'] if 'password' in request.form and request.form['password'] else None
-        )
+        user_id = request.form['id']
+        username = request.form['username']
+        enabled = True if 'enabled' in request.form and request.form['enabled'] == '1' else False
+        password = request.form['password'] if 'password' in request.form and request.form['password'] else None
+        
+        self._model_store.user().update_form(id=user_id, enabled=enabled, username=username, password=password)
+        logging.info(f"User {username} (ID: {user_id}) updated.")
         return redirect(url_for('auth_user_list'))
 
     def auth_user_delete(self, user_id: Optional[int] = 0):
         user = self._model_store.user().get(user_id)
 
         if not user:
+            logging.warning(f"Attempt to delete non-existent user with ID: {user_id}.")
             return redirect(url_for('auth_user_list'))
 
         if user.id == str(current_user.id):
+            logging.warning(f"User {user.username} (ID: {user_id}) attempted to delete themselves.")
             return redirect(url_for('auth_user_list', error='auth_user_delete_cant_delete_yourself'))
 
         if self._model_store.user().count_all_enabled() == 1:
+            logging.warning(f"Attempt to delete the last enabled user: {user.username} (ID: {user_id}).")
             return redirect(url_for('auth_user_list', error='auth_user_delete_at_least_one_account'))
 
         self._model_store.user().delete(user_id)
+        logging.info(f"User {user.username} (ID: {user_id}) deleted.")
         return redirect(url_for('auth_user_list'))

@@ -7,3 +7,4 @@ class ApplicationLanguage(Enum):
     FRENCH = 'fr'
     ITALIAN = 'it'
     SPANISH = 'es'
+    ARABIC = 'ar'

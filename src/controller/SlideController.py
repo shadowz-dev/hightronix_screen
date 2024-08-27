@@ -54,6 +54,9 @@ class SlideController(ObController):
         self._model_store.slide().add_form(slide)
         self._post_update()
 
+        # Log the event
+        
+
         if slide.playlist_id:
             return redirect(url_for('playlist_list', playlist_id=slide.playlist_id))
 

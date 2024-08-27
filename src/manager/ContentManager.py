@@ -16,7 +16,7 @@ from src.manager.VariableManager import VariableManager
 from src.service.ModelManager import ModelManager
 from src.util.UtilFile import randomize_filename
 from src.util.UtilNetwork import get_preferred_ip_address
-from src.util.UtilVideo import mp4_duration_with_ffprobe
+from src.util.UtilVideo import get_video_duration_with_moviepy
 from src.util.utils import encode_uri_component
 
 
@@ -200,7 +200,7 @@ class ContentManager(ModelManager):
                 content.location = object_path
 
                 if type == ContentType.VIDEO:
-                    content.duration = mp4_duration_with_ffprobe(content.location)
+                    content.duration = get_video_duration_with_moviepy(content.location)
 
         else:
             content.location = location if location else ''

@@ -219,6 +219,14 @@ class DatabaseManager:
             "UPDATE content SET uuid = id WHERE uuid = '' or uuid is null",
             "UPDATE slide SET uuid = id WHERE uuid = '' or uuid is null",
             "UPDATE user SET apikey = \'{}\' || id WHERE apikey = '' or apikey is null".format(str(uuid.uuid4())),
+            """
+            CREATE TABLE IF NOT EXISTS activity_log (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER,
+            action TEXT,
+            details TEXT,
+            timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
+            )"""
         ]
 
         for query in queries:
@@ -234,3 +242,12 @@ class DatabaseManager:
             else:
                 sanitized_params.append(param)
         return sanitized_params
+    
+    # Adding method to log events
+    def log_event(self, user_id: int, action: str, details: str =""):
+        self.add("activity_log",
+                {
+                    "user_id": user_id,
+                    "action": action,
+                    "details": details
+                })

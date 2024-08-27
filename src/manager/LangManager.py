@@ -10,26 +10,40 @@ from src.util.utils import camel_to_snake
 class LangManager:
 
     LANG_FILE = "lang/{}.json"
+    FALLBACK_LANG = "en"
 
     def __init__(self, lang: str = "en"):
         self._map = {}
         self._lang = lang.lower()
         self.load()
 
-    def set_lang(self, lang):
+    def set_lang(self, lang: str):
         self._map = {}
         self._lang = lang.lower()
         self.load()
 
     def load(self, directory: str = "", prefix: str = ""):
         file_name = "{}{}{}".format(directory, "/" if directory else "", self.LANG_FILE.format(self._lang))
+        fallback_file_name = "{}{}{}".format(directory, "/" if directory else "", self.LANG_FILE.format(self.FALLBACK_LANG))
 
         try:
-            with open(file_name, 'r') as file:
+            with open(file_name, 'r', encoding='utf-8') as file:
                 for key, value in json.load(file).items():
                     self._map["{}{}{}".format(prefix, "_" if prefix else "", key)] = value
         except FileNotFoundError:
-            logging.error("Lang file {} not found".format(file_name))
+            logging.error(f"Lang file {file_name} not found, falling back to {fallback_file_name}")
+            self._load_fallback(fallback_file_name, directory, prefix)
+
+    def _load_fallback(self, fallback_file_name: str, directory: str = "", prefix: str = ""):
+        # Load fallback language (e.g., English)
+        try:
+            with open(fallback_file_name, 'r', encoding='utf-8') as file:
+                for key, value in json.load(file).items():
+                    if key not in self._map:  # Only add if not already in map
+                        self._map["{}{}{}".format(prefix, "_" if prefix else "", key)] = value
+        except FileNotFoundError:
+            logging.error(f"Fallback lang file {fallback_file_name} not found. Check your language files.")
+
 
     def map(self) -> dict:
         return self._map

@@ -1,9 +1,17 @@
 import mimetypes
-
 from enum import Enum
 from typing import Union, List, Optional
 
 from src.util.utils import str_to_enum
+
+# Register additional MIME types
+mimetypes.add_type('video/avi', '.avi')
+mimetypes.add_type('video/mkv', '.mkv')
+mimetypes.add_type('video/webm', '.webm')
+mimetypes.add_type('video/mov', '.mov')
+mimetypes.add_type('video/ogg', '.ogv')
+mimetypes.add_type('video/x-flv', '.flv')
+mimetypes.add_type('video/x-ms-wmv', '.wmv')
 
 
 class ContentInputType(Enum):
@@ -43,7 +51,17 @@ class ContentType(Enum):
         ]:
             return ContentType.PICTURE
         elif mime_type in [
-            'video/mp4'
+            'video/mp4',
+            'video/avi',
+            'video/mkv',
+            'video/webm',
+            'video/mov',
+            'video/x-msvideo',
+            'video/x-matroska',
+            'video/ogg',
+            'video/quicktime',
+            'video/x-flv',
+            'video/x-ms-wmv'
         ]:
             return ContentType.VIDEO
 

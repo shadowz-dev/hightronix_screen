@@ -291,6 +291,7 @@
   "enum_application_language_french": "Français",
   "enum_application_language_italian": "Italien",
   "enum_application_language_spanish": "Espagnol",
+  "enum_application_language_arabic": "العربية",
   "enum_content_type_external_storage": "Stockage externe",
   "enum_content_type_external_storage_object_label": "Spécifiez un répertoire existant par rapport au chemin suivant",
   "enum_content_type_external_storage_flashdrive_label": "Chemin relatif à un périphérique amovible",

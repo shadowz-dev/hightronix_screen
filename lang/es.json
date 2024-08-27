@@ -290,6 +290,7 @@
   "enum_application_language_french": "Francés",
   "enum_application_language_italian": "Italiano",
   "enum_application_language_spanish": "Español",
+  "enum_application_language_arabic": "العربية",
   "enum_content_type_external_storage": "Almacenamiento externo",
   "enum_content_type_external_storage_object_label": "Especifique un directorio existente relativo a la siguiente ruta",
   "enum_content_type_external_storage_flashdrive_label": "Ruta relativa a un dispositivo extraíble",
