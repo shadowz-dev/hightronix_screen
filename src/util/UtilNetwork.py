@@ -59,3 +59,29 @@ def get_safe_remote_addr(remote_addr: str) -> str:
     if remote_addr == '127.0.0.1' or remote_addr == 'localhost':
         return get_ip_address()
     return remote_addr
+
+def get_safe_remote_mac_or_ip() -> str:
+    ip_address = get_ip_address()
+    mac_address = get_mac_address()
+    return ip_address, mac_address
+
+def get_mac_address() -> Optional[str]:
+    try:
+        os_name = platform.system().lower()
+        if os_name == "linux":
+            result = subprocess.run(["cat", "/sys/class/net/eth0/address"], capture_output=True, text=True)
+            mac_address = result.stdout.strip()
+
+        elif os_name == "darwin":
+            result = subprocess.run(["ifconfing", "en0"], capture_output=True, text=True)
+            mac_address = result.stdout.split()[0]
+        elif os.name == "windows":
+            result = subprocess.run(["getmac"], capture_output=True, text=True)
+            mac_address = result.stdout.split()[0]
+        else:
+            logging.warn(f"Unsupported OS: {os_name}")
+            return None
+        return mac_address
+    except Exception as e:
+        logging.error(f"Error obtaining mac address: {e}")
+        return None

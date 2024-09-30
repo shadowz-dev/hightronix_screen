@@ -8,10 +8,11 @@ from src.util.utils import str_to_enum
 
 class NodePlayer:
 
-    def __init__(self, host: str = '', name: str = 'Untitled', operating_system: Optional[OperatingSystem] = None, id: Optional[int] = None, group_id: Optional[int] = None, created_by: Optional[str] = None, updated_by: Optional[str] = None, created_at: Optional[int] = None, updated_at: Optional[int] = None, folder_id: Optional[int] = None):
+    def __init__(self, host: str = '', mac_address: str = '',name: str = 'Untitled', operating_system: Optional[OperatingSystem] = None, id: Optional[int] = None, group_id: Optional[int] = None, created_by: Optional[str] = None, updated_by: Optional[str] = None, created_at: Optional[int] = None, updated_at: Optional[int] = None, folder_id: Optional[int] = None):
         self._id = id if id else None
         self._group_id = group_id
         self._host = host
+        self.mac_address = mac_address
         self._operating_system = str_to_enum(operating_system, OperatingSystem) if isinstance(operating_system, str) else operating_system
         self._name = name
         self._folder_id = folder_id
