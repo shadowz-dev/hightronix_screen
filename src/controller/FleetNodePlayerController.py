@@ -69,7 +69,6 @@ class FleetNodePlayerController(ObController):
             NodePlayer(
                 name=request.form['name'],
                 host=request.form['host'],
-                mac_address=request.form['mac_address'],
                 operating_system=str_to_enum(request.form['operating_system'], OperatingSystem),
                 folder_id=working_folder.id if working_folder else None,
             )
